@@ -73,12 +73,6 @@ void LALRParser::computerLookAhead()
 			table_[stat][sym] = *pr.second->begin();
 		}
 	}
-	/* 最终,还有一个问题需要解决一下,那就是start和#标记,因为start并不存在follow集合,所以start符号要特殊处理 */
-	//table_[start_] = map<symbolPtr, Action>();
-	//auto rules = g_.findRules(g_.start_);
-	//assert(rules->size() == 1);
-	//auto sym = (*rules)[0]->findNthElem(0);
-	//table_[start_][sym] = makeAction(Action::reduce, (*rules)[0]); // 使用start->xxx #来规约
 }
 
 size_t LALRParser::expandRule(list<Item>& items, bool& exists)

@@ -10,6 +10,7 @@
 #include <list>
 #include <fstream>
 #include <stack>
+#include <regex>
 using namespace std;
 
 class Rule;
@@ -101,5 +102,5 @@ class GrammarError {
 public:
 	int line_;   
 	int pos_;
-	wstring message_;
+	wstring msg_;
 };

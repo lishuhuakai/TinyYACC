@@ -38,6 +38,9 @@ public:
 	void printStats();
 	void computerLookAhead(); 
 	Action queryAction(size_t state, symbolPtr& sym) {
+		assert(table_.find(state) != table_.end());
+		if (table_[state].find(sym) == table_[state].end())
+			throw GrammarError();
 		return table_[state][sym];
 	}
 

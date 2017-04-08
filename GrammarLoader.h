@@ -5,13 +5,12 @@
 class Lexer;
 class LALRParser;
 class GrammarNode;
-class StartNode;
 class RuleNode;
-class ListNode;
+class LstNode;
 class TokenNode;
 class AtomNode;
 class ExpansionsNode;
-class DefineNode;
+class DefNode;
 class ItemNode;
 typedef shared_ptr<GrammarNode> grammarNodePtr;
 
@@ -24,6 +23,10 @@ public:
 	~GrammarLoader();
 private:
 	shared_ptr<Grammar>  g_;
+	enum TokenType {
+		def, lst, rule, token, expansions, atom, // Non-Terminal
+		NAME, NL, TO, STRING, REGEXP, COLON      // Terminal
+	};
 public:
 	shared_ptr<Lexer> lexer_;
 	shared_ptr<LALRParser> parser_;
@@ -43,33 +46,25 @@ public:
 public:
 	class IVisitor {
 	public:
-		virtual void visit(ListNode&)=0;
-		virtual void visit(StartNode&)=0;
+		virtual void visit(LstNode&)=0;
 		virtual void visit(RuleNode&)=0;
 		virtual void visit(ExpansionsNode&)=0;
 		virtual void visit(TokenNode&)=0;
-		virtual void visit(DefineNode&)=0;
+		virtual void visit(DefNode&)=0;
 		virtual void visit(AtomNode&)=0;
 		virtual void visit(ItemNode&)=0;
 	};
 	wstring type_;
 };
 
-class StartNode : public GrammarNode {
-public:
-	StartNode(grammarNodePtr& lst) :
-		GrammarNode(L"start"), list_(lst)
-	{}
-	grammarNodePtr list_;
-};
 
-class ListNode : public GrammarNode {
+class LstNode : public GrammarNode {
 public:
-	ListNode(grammarNodePtr& lst, grammarNodePtr& it) :
-	GrammarNode(L"list"), list_(lst), item_(it)
+	LstNode(grammarNodePtr& lst, grammarNodePtr& it) :
+	GrammarNode(L"lst"), list_(lst), item_(it)
 	{}
-	ListNode() :
-	GrammarNode(L"list")
+	LstNode() :
+	GrammarNode(L"lst")
 	{}
 	
 	grammarNodePtr list_;
@@ -106,10 +101,10 @@ public:
 	grammarNodePtr def_;
 };
 
-class DefineNode : public GrammarNode {
+class DefNode : public GrammarNode {
 public:
-	DefineNode(Token& tk) :
-	GrammarNode(L"define")
+	DefNode(Token& tk) :
+	GrammarNode(L"def")
 	{
 		if (tk.kind == L"STRING")
 			name = tk.content.substr(1, tk.content.size() - 2); // È¥µôÁ½²àµÄ""

@@ -79,8 +79,8 @@ GrammarLoader::GrammarLoader() {
 	vector<wstring> ignore = { wstring(L"WS"), wstring(L"COMMENT") };
 	lexer_ = make_shared<Lexer>(_grammarTokens, ignore);
 	symbolPtr start			=		make_shared<Symbol>(Symbol::NonTerminal, L"start");
-	symbolPtr _define		=		make_shared<Symbol>(Symbol::NonTerminal, L"define");
-	symbolPtr _list			=		make_shared<Symbol>(Symbol::NonTerminal, L"list");
+	symbolPtr def			=		make_shared<Symbol>(Symbol::NonTerminal, L"def");
+	symbolPtr lst			=		make_shared<Symbol>(Symbol::NonTerminal, L"lst");
 	symbolPtr item			=		make_shared<Symbol>(Symbol::NonTerminal, L"item");
 	symbolPtr rule			=		make_shared<Symbol>(Symbol::NonTerminal, L"rule");
 	symbolPtr token			=		make_shared<Symbol>(Symbol::NonTerminal, L"token");
@@ -94,26 +94,26 @@ GrammarLoader::GrammarLoader() {
 	symbolPtr regular		=		make_shared<Symbol>(Symbol::Terminal, L"REGEXP");
 	symbolPtr colon			=		make_shared<Symbol>(Symbol::Terminal, L"COLON");
 
-	// start -> list #
+	// start -> lst #
 	rulePtr r0 = make_shared<Rule>(start);
-	r0->expansionAppend(_list);
+	r0->expansionAppend(lst);
 	r0->expansionAppend(end);
-	// list -> list item
-	rulePtr r1 = make_shared<Rule>(_list);
-	r1->expansionAppend(_list);
+	// lst -> lst item
+	rulePtr r1 = make_shared<Rule>(lst);
+	r1->expansionAppend(lst);
 	r1->expansionAppend(item);
-	// list -> ¦Å
-	rulePtr r2 = make_shared<Rule>(_list);
+	// lst -> ¦Å
+	rulePtr r2 = make_shared<Rule>(lst);
 	// item -> rule
 	rulePtr r3 = make_shared<Rule>(item);
 	r3->expansionAppend(rule);
 	// item -> token
 	rulePtr r4 = make_shared<Rule>(item);
 	r4->expansionAppend(token);
-	// item -> nl [»»ÐÐ·û]
+	// item -> NL [»»ÐÐ·û]
 	rulePtr r5 = make_shared<Rule>(item);
 	r5->expansionAppend(nl);
-	// rule -> name to expansions nl
+	// rule -> NAME TO expansions NL
 	rulePtr r6 = make_shared<Rule>(rule);
 	r6->expansionAppend(name);
 	r6->expansionAppend(to);
@@ -125,23 +125,23 @@ GrammarLoader::GrammarLoader() {
 	r7->expansionAppend(atom);
 	// expansions -> ¦Å
 	rulePtr r8 = make_shared<Rule>(expansions);
-	// atom -> name
+	// atom -> NAME
 	rulePtr r9 = make_shared<Rule>(atom);
 	r9->expansionAppend(name);
-	// atom -> string
+	// atom -> STRING
 	rulePtr r10 = make_shared<Rule>(atom);
 	r10->expansionAppend(_string);
-	// token -> name colon define nl
+	// token -> NAME COLON def nl
 	rulePtr r11 = make_shared<Rule>(token);
 	r11->expansionAppend(name);
 	r11->expansionAppend(colon);
-	r11->expansionAppend(_define);
+	r11->expansionAppend(def);
 	r11->expansionAppend(nl);
-	// define -> regular
-	rulePtr r12 = make_shared<Rule>(_define);
+	// def -> REGEXP
+	rulePtr r12 = make_shared<Rule>(def);
 	r12->expansionAppend(regular);
-	// define -> string
-	rulePtr r13 = make_shared<Rule>(_define);
+	// def -> STRING
+	rulePtr r13 = make_shared<Rule>(def);
 	r13->expansionAppend(_string);
 
 	g_ = make_shared<Grammar>(start);
@@ -179,13 +179,13 @@ grammarNodePtr parse(GrammarLoader& loader, const wstring& fileName) {
 	typedef LALRParser::Action Action;
 	auto parser = loader.parser_;
 	auto lexer = loader.lexer_;
-	parser->computerLookAhead();
-	loader.g_->printSets();
+	//parser->computerLookAhead();
+	//loader.g_->printSets();
 	//parser->printStats();
 	lexer->setStream(readFile(fileName));
 	bool over = false;
 	// two stacks are necessary, one for state, another for value
-	stack<shared_ptr<GrammarNode>> subTree;
+	stack<shared_ptr<GrammarNode>> tree;
 	stack<size_t> stateStack;
 	stack<Token> valueStack;
 	// firstly, we should push the first state onto stateStack.
@@ -193,12 +193,12 @@ grammarNodePtr parse(GrammarLoader& loader, const wstring& fileName) {
 	size_t state;
 	while (true) {
 		state = stateStack.top(); 
-		Token tk = lexer->peekToken();
-		//if (valueStack.top().kind == L"start" && tk.kind == L"#") break;
+		Token tk = lexer->peek();
 		// query the table to know how to manipulate the elemt in valueStack
 		Action act = parser->queryAction(state, loader.g_->strToSymbol(tk.kind));
 		if (act.act == Action::shift) { // shift required!
-			lexer->nextToken();
+			auto kk = lexer->next();
+			if (kk.kind == L"#") break; 
 			stateStack.push(act.index);
 			valueStack.push(tk);
 		}
@@ -210,26 +210,23 @@ grammarNodePtr parse(GrammarLoader& loader, const wstring& fileName) {
 				// atom -> STRING
 				// atom -> NAME
 				auto pattern = valueStack.top(); stateStack.pop(); 
-				subTree.push(make_shared<AtomNode>(pattern)); valueStack.pop();
-				valueStack.push(Token(L"atom"));
+				tree.push(make_shared<AtomNode>(pattern)); valueStack.pop();
 			}
-			else if (origin->content_ == L"define") {
-				// define -> REGEXP
-				// define -> STRING
+			else if (origin->content_ == L"def") {
+				// def -> REGEXP
+				// def -> STRING
 				auto pattern = valueStack.top(); stateStack.pop(); 
-				subTree.push(make_shared<DefineNode>(pattern)); valueStack.pop();
-				valueStack.push(Token(L"define"));
+				tree.push(make_shared<DefNode>(pattern)); valueStack.pop();
 			}
 			else if (origin->content_ == L"token") {
-				// token -> NAME COLON define NL
+				// token -> NAME COLON def NL
 				valueStack.pop(); stateStack.pop(); // NL
-				valueStack.pop(); stateStack.pop(); // define
+				valueStack.pop(); stateStack.pop(); // def
 				valueStack.pop(); stateStack.pop(); // COLON
 				auto NAME = valueStack.top(); valueStack.pop(); stateStack.pop(); // NAME
-				auto def = subTree.top(); subTree.pop();
+				auto def = tree.top(); tree.pop();
 
-				subTree.push(make_shared<TokenNode>(NAME, def));
-				valueStack.push(Token(L"token"));
+				tree.push(make_shared<TokenNode>(NAME, def));
 			}
 			else if (origin->content_ == L"rule") {
 				// rule -> NAME TO expansions NL
@@ -237,62 +234,51 @@ grammarNodePtr parse(GrammarLoader& loader, const wstring& fileName) {
 				valueStack.pop(); stateStack.pop(); // expansions
 				valueStack.pop(); stateStack.pop(); // TO
 				auto NAME = valueStack.top(); valueStack.pop(); stateStack.pop(); // NAME
-				auto exps = subTree.top(); subTree.pop();
-				subTree.push(make_shared<RuleNode>(NAME, exps));
-				valueStack.push(Token(L"rule"));
+				auto exps = tree.top(); tree.pop();
+				tree.push(make_shared<RuleNode>(NAME, exps));
 			}
 			else if (origin->content_ == L"expansions") {
 				// expansions -> expansions atom | ¦Å
 				if (r->expansionLength() == 0) {
-					subTree.push(make_shared<ExpansionsNode>());
+					tree.push(make_shared<ExpansionsNode>());
 				}
 				else {
 					valueStack.pop(); stateStack.pop(); // atom
 					valueStack.pop(); stateStack.pop(); // expansions
-					auto atom = subTree.top(); subTree.pop();
-					auto exps = subTree.top(); subTree.pop();
-					subTree.push(make_shared<ExpansionsNode>(exps, atom));
+					auto atom = tree.top(); tree.pop();
+					auto exps = tree.top(); tree.pop();
+					tree.push(make_shared<ExpansionsNode>(exps, atom));
 				}
-				valueStack.push(Token(L"expansions"));
 			}
 			else if (origin->content_ == L"item") {
 				// item -> rule | token | NL
 				valueStack.pop(); stateStack.pop(); // rule or token or NL
 				if (r->findNthElem(0)->content_ != L"NL") {
-					auto ruleOrToken = subTree.top(); subTree.pop();
-					subTree.push(make_shared<ItemNode>(ruleOrToken));
+					auto ruleOrToken = tree.top(); tree.pop();
+					tree.push(make_shared<ItemNode>(ruleOrToken));
 				}
-				else subTree.push(make_shared<ItemNode>());
-				valueStack.push(Token(L"item"));
+				else tree.push(make_shared<ItemNode>());
 			}
-			else if (origin->content_ == L"list") {
-				// list -> list item | ¦Å
+			else if (origin->content_ == L"lst") {
+				// lst -> lst item | ¦Å
 				if (r->isEpsRule()) {
-					subTree.push(make_shared<ListNode>());
+					tree.push(make_shared<LstNode>());
 				}
 				else {
 					valueStack.pop(); stateStack.pop(); // item
-					valueStack.pop(); stateStack.pop(); // list
-					auto item = subTree.top(); subTree.pop();
-					auto _list = subTree.top(); subTree.pop();
-					subTree.push(make_shared<ListNode>(_list, item));
+					valueStack.pop(); stateStack.pop(); // lst
+					auto item = tree.top(); tree.pop();
+					auto lst = tree.top(); tree.pop();
+					tree.push(make_shared<LstNode>(lst, item));
 				}
-				valueStack.push(Token(L"list"));
 			}
-			else if (origin->content_ == L"start") {
-				// start -> list #
-				valueStack.pop(); stateStack.pop(); // #
-				valueStack.pop(); stateStack.pop(); // list
-				auto _list = subTree.top(); subTree.pop();
-				subTree.push(make_shared<StartNode>(_list));
-				valueStack.push(Token(L"start"));
-				break; // all is done!
-			}
-			auto kind = valueStack.top().kind;
+			else assert(0);
+			valueStack.push(Token(r->origin()->content_));
 			auto act = parser->queryAction(stateStack.top(), loader.g_->strToSymbol(valueStack.top().kind));
 			assert(act.act == Action::shift);
 			stateStack.push(act.index);
 		}
 	}
-	return subTree.top();
+	assert(tree.size() == 1);
+	return tree.top();
 }

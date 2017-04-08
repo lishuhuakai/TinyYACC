@@ -17,7 +17,7 @@ Lexer::~Lexer()
 /*
  * lex开始对解析文本.
  */
-Token Lexer::nextToken()
+Token Lexer::next()
 {
 	if (cache_.size() != 0) {
 		auto tk = cache_.front();
@@ -48,7 +48,7 @@ Token Lexer::nextToken()
 			}
 			if (ignore_.find(type) != ignore_.end()) { // should be ignored!
 				if (!over)
-					return nextToken();
+					return next();
 				else
 					return Token(L"end", line, column, L"");
 			}
@@ -64,9 +64,9 @@ Token Lexer::nextToken()
 /*
  * peekToken 并不消耗这个token,只是偷看一下
  */
-Token Lexer::peekToken() {
+Token Lexer::peek() {
 	if (cache_.size() == 0) {
-		cache_.push_back(nextToken());
+		cache_.push_back(next());
 	}
 	 return cache_.front();
 }

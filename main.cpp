@@ -173,8 +173,7 @@ int main() {
 	//lalr.printStats();
 	//demo();
 	GrammarLoader loader;
-	bool over = false;
-	parse(loader, L"1.df");
+	grammarNodePtr nd = parse(loader, L"1.df");
 	getchar();
 	return 0;
 }

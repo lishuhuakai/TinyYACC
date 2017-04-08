@@ -45,8 +45,8 @@ public:
 		column_ = 1;
 		stream_ = stream;
 	}
-	Token nextToken();
-	Token peekToken();
+	Token next();
+	Token peek();
 };
 
 void checkTokens(vector<TokenDef>& tokens);
