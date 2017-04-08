@@ -1,0 +1,8 @@
+// Yihulee's Grammar define file
+// Grammar are defined as follows:
+expression --> factor "+" item
+item --> item "*" digit
+digit: "2"
+
+signal: / [0-9na-zA-Z_] /
+demo1: / \s+? /
