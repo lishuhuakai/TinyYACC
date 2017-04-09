@@ -174,6 +174,8 @@ int main() {
 	//demo();
 	GrammarLoader loader;
 	grammarNodePtr nd = parse(loader, L"1.df");
+	PrintTree p(*nd);
+	p.visitTree();
 	getchar();
 	return 0;
 }

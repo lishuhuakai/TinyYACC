@@ -54,22 +54,6 @@ static vector<TokenDef> _grammarTokens = {
 	TokenDef(wstring(L"TO"), wstring(L"-->"))
 };
 
-/*
- * splitString 用于切割字符串,使用的分割符是spliter
- */
-static vector<wstring> splitString(wstring& str, wchar_t spliter) {
-	size_t offset = 0;
-	vector<wstring> res;
-	for (auto it = str.begin(); it != str.end(); ++it) {
-		if (*it == spliter) {
-			size_t len = it - (str.begin() + offset);
-			if (len != 0)
-				res.push_back(str.substr(offset, len));
-			offset = offset + len + 1;
-		}
-	}
-	return res;
-}
 
 /*
  * 在构造函数里面需要加载最初的文法规则.
@@ -179,7 +163,7 @@ grammarNodePtr parse(GrammarLoader& loader, const wstring& fileName) {
 	typedef LALRParser::Action Action;
 	auto parser = loader.parser_;
 	auto lexer = loader.lexer_;
-	//parser->computerLookAhead();
+	parser->computerLookAhead();
 	//loader.g_->printSets();
 	//parser->printStats();
 	lexer->setStream(readFile(fileName));
@@ -281,4 +265,117 @@ grammarNodePtr parse(GrammarLoader& loader, const wstring& fileName) {
 	}
 	assert(tree.size() == 1);
 	return tree.top();
+}
+
+/*************************************************************************************
+ 展示一棵ast,通过将节点内容. 下面的内容只是为了查看方便而已,和真正的核心代码没有任何关系.
+**************************************************************************************/
+void printTree(GrammarNode& g) {
+	PrintTree p(g);
+	p.visitTree();
+}
+
+PrintTree::PrintTree(GrammarNode& root) :
+	root_(root)
+{}
+
+/*
+* getRaomLabel  获取一个随机的,但是每次都不一样的label,实际上也不是每次都不一样,只是有一个周期而已.
+*/
+wstring PrintTree::getRandomLabel() {
+	wstring label;
+	static wchar_t first = L'a';
+	static wchar_t mid = L'A';
+	static wchar_t num1 = L'0';
+	static wchar_t num2 = L'1';
+	label += first; first++;
+	label += mid; mid++;
+	label += num1; num1++;
+	label += num2; num2++;
+	if (first > L'z') first = L'a';
+	if (mid > L'Z') mid = L'A';
+	if (num1 > L'9') num1 = L'0';
+	if (num2 > L'9') num2 = L'0';
+	return label;
+}
+
+void PrintTree::visitTree() {
+	wofstream file("SyntaxTree.gv", wios::out);
+	root_.evaluate(*this);
+	if (file.is_open()) {
+		file << L"digraph syntaxTree {" << endl;
+		file << labels_.c_str();
+		file << relations_.c_str();
+		file << L"}" << endl;
+	}
+	file.close();
+}
+
+void PrintTree::visit(LstNode& lst) {
+	wstring lb = getRandomLabel();
+	if (!lst.item_)
+		labels_ = labels_ + lb + L"[label=\"LstNode(epsilon)" + L"\"];\n";
+	else {
+		// lst -> lst item
+		labels_ = labels_ + lb + L"[label=\"LstNode\"];\n";
+		lst.list_->evaluate(*this);
+		relations_ = relations_ + lb + L"->" + lb_ + L"\n";
+		lst.item_->evaluate(*this);
+		relations_ = relations_ + lb + L"->" + lb_ + L"\n";
+	}
+	lb_ = lb;
+}
+
+void PrintTree::visit(RuleNode& r) {
+	wstring lb = getRandomLabel();
+	labels_ = labels_ + lb + L"[label=\"RuleNode(" + r.origin_ + L")\"];\n";
+	r.expansion_->evaluate(*this);
+	relations_ = relations_ + lb + L"->" + lb_ + L"\n";
+	lb_ = lb;
+}
+
+void PrintTree::visit(DefNode& def) {
+	wstring lb = getRandomLabel();
+	labels_ = labels_ + lb + L"[label=\"DefNode(" + def.name + L")\"];\n";
+	lb_ = lb;
+}
+
+void PrintTree::visit(TokenNode& tk) {
+	wstring lb = getRandomLabel();
+	labels_ = labels_ + lb + L"[label=\"TokenNode(" + tk.name_ + L")\"];\n";
+	tk.def_->evaluate(*this);
+	relations_ = relations_ + lb + L"->" + lb_ + L"\n";
+	lb_ = lb;
+}
+
+void PrintTree::visit(ExpansionsNode& exps) {
+	wstring lb = getRandomLabel();
+	if (!exps.expansions_)
+		labels_ = labels_ + lb + L"[label=\"ExpansionsNode(epsilon)\"];\n";
+	else {
+		labels_ = labels_ + lb + L"[label=\"ExpansionsNode\"];\n";
+		exps.expansions_->evaluate(*this);
+		relations_ = relations_ + lb + L"->" + lb_ + L"\n";
+		exps.atom_->evaluate(*this);
+		relations_ = relations_ + lb + L"->" + lb_ + L"\n";
+	}
+	lb_ = lb;
+}
+
+void PrintTree::visit(AtomNode& at) {
+	wstring lb = getRandomLabel();
+	labels_ = labels_ + lb + L"[label=\"AtomNode(" + at.pattern_ + L")\"];\n";
+	lb_ = lb;
+}
+
+void PrintTree::visit(ItemNode& it) {
+	wstring lb = getRandomLabel();
+	if (!it.sub_)
+		labels_ = labels_ + lb + L"[label=\"ItemNode(epsilon)\"];\n";
+	else {
+		labels_ = labels_ + lb + L"[label=\"ItemNode\"];\n";
+		it.sub_->evaluate(*this);
+		relations_ = relations_ + lb + L"->" + lb_ + L"\n";
+	}
+	lb_ = lb;
 }

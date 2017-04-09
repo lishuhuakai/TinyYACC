@@ -55,8 +55,9 @@ public:
 		virtual void visit(ItemNode&)=0;
 	};
 	wstring type_;
+public:
+	virtual void evaluate(IVisitor& v) = 0;
 };
-
 
 class LstNode : public GrammarNode {
 public:
@@ -66,7 +67,9 @@ public:
 	LstNode() :
 	GrammarNode(L"lst")
 	{}
-	
+	void evaluate(IVisitor& v) {
+		v.visit(*this);
+	}
 	grammarNodePtr list_;
 	grammarNodePtr item_;
 };
@@ -76,6 +79,9 @@ public:
 	RuleNode(Token& tk, grammarNodePtr& exp) :
 		GrammarNode(L"rule"), origin_(tk.content), expansion_(exp)
 	{}
+	void evaluate(IVisitor& v) {
+		v.visit(*this);
+	}
 	grammarNodePtr expansion_;
 	wstring origin_;
 };
@@ -88,6 +94,9 @@ public:
 	ExpansionsNode() :
 		GrammarNode(L"expansions")
 	{}
+	void evaluate(IVisitor& v) {
+		v.visit(*this);
+	}
 	grammarNodePtr atom_;
 	grammarNodePtr expansions_;
 };
@@ -97,6 +106,9 @@ public:
 	TokenNode(Token& tk, grammarNodePtr& def) :
 		GrammarNode(L"token"), name_(tk.content), def_(def)
 	{}
+	void evaluate(IVisitor& v) {
+		v.visit(*this);
+	}
 	wstring name_;
 	grammarNodePtr def_;
 };
@@ -114,6 +126,9 @@ public:
 		else
 			assert(0);
 	}
+	void evaluate(IVisitor& v) {
+		v.visit(*this);
+	}
 	wstring name;
 };
 
@@ -130,6 +145,9 @@ public:
 		else
 			assert(0);
 	}
+	void evaluate(IVisitor& v) {
+		v.visit(*this);
+	}
 	wstring pattern_;
 };
 
@@ -141,6 +159,39 @@ public:
 	ItemNode() :
 		GrammarNode(L"item")
 	{}
+	void evaluate(IVisitor& v) {
+		v.visit(*this);
+	}
 	grammarNodePtr sub_;
 };
 
+
+/*******************************************************
+	打印一棵树.
+********************************************************/
+class PrintTree : public GrammarNode::IVisitor {
+private:
+	wstring labels_;
+	wstring relations_;
+	wstring lb_;
+public:
+	PrintTree(GrammarNode& root);
+	void visitTree();
+private:
+	void visit(ItemNode&);
+	void visit(LstNode&);
+	void visit(AtomNode&);
+	void visit(DefNode&);
+	void visit(RuleNode&);
+	void visit(ExpansionsNode&);
+	void visit(TokenNode&);
+private:
+	GrammarNode& root_;
+private:
+	static wstring getRandomLabel();
+};
+
+/*
+ * 向外提供一个接口.
+ */
+void printTree(GrammarNode& g);
