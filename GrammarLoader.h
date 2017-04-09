@@ -62,7 +62,7 @@ public:
 class LstNode : public GrammarNode {
 public:
 	LstNode(grammarNodePtr& lst, grammarNodePtr& it) :
-	GrammarNode(L"lst"), list_(lst), item_(it)
+	GrammarNode(L"lst"), lst_(lst), item_(it)
 	{}
 	LstNode() :
 	GrammarNode(L"lst")
@@ -70,7 +70,7 @@ public:
 	void evaluate(IVisitor& v) {
 		v.visit(*this);
 	}
-	grammarNodePtr list_;
+	grammarNodePtr lst_;
 	grammarNodePtr item_;
 };
 
@@ -134,21 +134,27 @@ public:
 
 class AtomNode : public GrammarNode {
 public:
+	enum Attp { STRING, NAME};
 	AtomNode(Token& tk) :
 		GrammarNode(L"atom")
 	{
-		if (tk.kind == L"STRING")
+		if (tk.kind == L"STRING") {
 			pattern_ = tk.content.substr(1, tk.content.size() - 2); // 去掉两侧的""
+			attp_ = STRING;
+		}
 		else if (tk.kind == L"NAME") {
 			pattern_ = tk.content;
+			attp_ = NAME;
 		}
 		else
 			assert(0);
 	}
+
 	void evaluate(IVisitor& v) {
 		v.visit(*this);
 	}
 	wstring pattern_;
+	Attp attp_;
 };
 
 class ItemNode : public GrammarNode {
@@ -175,8 +181,8 @@ private:
 	wstring relations_;
 	wstring lb_;
 public:
-	PrintTree(GrammarNode& root);
-	void visitTree();
+	PrintTree() {};
+	void visitTree(GrammarNode& root);
 private:
 	void visit(ItemNode&);
 	void visit(LstNode&);
@@ -185,9 +191,6 @@ private:
 	void visit(RuleNode&);
 	void visit(ExpansionsNode&);
 	void visit(TokenNode&);
-private:
-	GrammarNode& root_;
-private:
 	static wstring getRandomLabel();
 };
 
@@ -195,3 +198,47 @@ private:
  * 向外提供一个接口.
  */
 void printTree(GrammarNode& g);
+
+/********************************************************
+	收集def以及rule的信息.
+********************************************************/
+class CollectDefsAndRules : public GrammarNode::IVisitor {
+public:
+	CollectDefsAndRules() {};
+	void collect(GrammarNode& root);
+public:
+	void visit(ItemNode&);
+	void visit(LstNode&);
+	void visit(AtomNode&);
+	void visit(DefNode&);
+	void visit(RuleNode&);
+	void visit(ExpansionsNode&);
+	void visit(TokenNode&);
+private:
+	struct RDef {
+		wstring origin;
+		vector<wstring> expansions;
+		friend wostream& operator<<(wostream& os, RDef& r) {
+			os << r.origin << L"	:";
+			for (auto exp : r.expansions) {
+				os << L" " << exp;
+			}
+			return os;
+		}
+	};
+	struct TkDef {
+		wstring type;
+		wstring pattern;
+		friend wostream& operator<<(wostream& os, TkDef& tk) {
+			os << tk.type << L"	:" << tk.pattern;
+			return os;
+		}
+	};
+private:
+	wstring patternOrName_;
+	shared_ptr<RDef> r_;
+	vector<RDef> rules_;
+	vector<TkDef> tokens_;
+};
+
+void collectDefsAndRules(GrammarNode& nd);

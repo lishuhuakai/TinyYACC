@@ -187,7 +187,6 @@ grammarNodePtr parse(GrammarLoader& loader, const wstring& fileName) {
 			valueStack.push(tk);
 		}
 		else { // reduce required!
-			//stateStack.pop();
 			rulePtr r = parser->queryRule(act.index);
 			auto origin = r->origin();
 			if (origin->content_ == L"atom") {
@@ -271,13 +270,9 @@ grammarNodePtr parse(GrammarLoader& loader, const wstring& fileName) {
  展示一棵ast,通过将节点内容. 下面的内容只是为了查看方便而已,和真正的核心代码没有任何关系.
 **************************************************************************************/
 void printTree(GrammarNode& g) {
-	PrintTree p(g);
-	p.visitTree();
+	PrintTree().visitTree(g);
 }
 
-PrintTree::PrintTree(GrammarNode& root) :
-	root_(root)
-{}
 
 /*
 * getRaomLabel  获取一个随机的,但是每次都不一样的label,实际上也不是每次都不一样,只是有一个周期而已.
@@ -299,9 +294,9 @@ wstring PrintTree::getRandomLabel() {
 	return label;
 }
 
-void PrintTree::visitTree() {
+void PrintTree::visitTree(GrammarNode& root) {
 	wofstream file("SyntaxTree.gv", wios::out);
-	root_.evaluate(*this);
+	root.evaluate(*this);
 	if (file.is_open()) {
 		file << L"digraph syntaxTree {" << endl;
 		file << labels_.c_str();
@@ -318,7 +313,7 @@ void PrintTree::visit(LstNode& lst) {
 	else {
 		// lst -> lst item
 		labels_ = labels_ + lb + L"[label=\"LstNode\"];\n";
-		lst.list_->evaluate(*this);
+		lst.lst_->evaluate(*this);
 		relations_ = relations_ + lb + L"->" + lb_ + L"\n";
 		lst.item_->evaluate(*this);
 		relations_ = relations_ + lb + L"->" + lb_ + L"\n";
@@ -371,11 +366,96 @@ void PrintTree::visit(AtomNode& at) {
 void PrintTree::visit(ItemNode& it) {
 	wstring lb = getRandomLabel();
 	if (!it.sub_)
-		labels_ = labels_ + lb + L"[label=\"ItemNode(epsilon)\"];\n";
+		labels_ = labels_ + lb + L"[label=\"ItemNode(NL)\"];\n";
 	else {
 		labels_ = labels_ + lb + L"[label=\"ItemNode\"];\n";
 		it.sub_->evaluate(*this);
 		relations_ = relations_ + lb + L"->" + lb_ + L"\n";
 	}
 	lb_ = lb;
+}
+
+/************************************************************************
+	CollectDefAndRule主要从ast中获取token的定义和文法.
+*************************************************************************/
+
+void CollectDefsAndRules::collect(GrammarNode & root)
+{
+	root.evaluate(*this);
+	wcout << L">>>>>>>>>>Rules<<<<<<<<<<" << endl;
+	for (auto r : rules_)
+		wcout << r << endl;
+	wcout << L">>>>>>>>>>Tokens<<<<<<<<<<" << endl;
+	for (auto tk : tokens_)
+		wcout << tk << endl;
+}
+
+void CollectDefsAndRules::visit(ItemNode &it)
+{
+	// item -> rule | token
+	if (it.sub_) {
+		it.sub_->evaluate(*this);
+	}
+}
+
+void CollectDefsAndRules::visit(LstNode &lst)
+{
+	// lst -> lst item | ε
+	if (lst.lst_) {
+		lst.lst_->evaluate(*this);
+		lst.item_->evaluate(*this);
+	}
+}
+
+void CollectDefsAndRules::visit(AtomNode& at)
+{
+	// at -> STRING | NAME
+	if (at.attp_ == AtomNode::STRING) {
+		// anoymous
+		patternOrName_ = L"#anoymous_" + at.pattern_;
+		TkDef tk = { patternOrName_, at.pattern_};
+		tokens_.push_back(tk);
+	}
+	else 
+		patternOrName_ = at.pattern_;
+}
+
+void CollectDefsAndRules::visit(DefNode& def)
+{
+	// def -> STRING | REGEXP
+	patternOrName_ = def.name;
+}
+
+void CollectDefsAndRules::visit(RuleNode& r)
+{
+	// rule -> NAME TO expansions NL
+	r_ = make_shared<RDef>();
+	r_->origin = r.origin_;
+	// 接下来是expansions
+	r.expansion_->evaluate(*this);
+	rules_.push_back(*r_);
+	r_.reset();
+}
+
+void CollectDefsAndRules::visit(ExpansionsNode& exps) 
+{
+	// expansions -> expansions atom | ε
+	if (exps.expansions_) {
+		exps.expansions_->evaluate(*this);
+		exps.atom_->evaluate(*this);
+		r_->expansions.push_back(patternOrName_);
+	}
+}
+
+void CollectDefsAndRules::visit(TokenNode& tk)
+{
+	TkDef token;
+	token.type = tk.name_;
+	tk.def_->evaluate(*this);
+	token.pattern = patternOrName_;
+	tokens_.push_back(token);
+}
+
+void collectDefsAndRules(GrammarNode& nd) {
+	CollectDefsAndRules().collect(nd);
 }
