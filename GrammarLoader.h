@@ -172,9 +172,11 @@ public:
 };
 
 
-/*******************************************************
-	打印一棵树.
-********************************************************/
+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//
+//	打印一棵树.
+//
+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 class PrintTree : public GrammarNode::IVisitor {
 private:
 	wstring labels_;
@@ -199,9 +201,11 @@ private:
  */
 void printTree(GrammarNode& g);
 
-/********************************************************
-	收集def以及rule的信息.
-********************************************************/
+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//
+//	收集def以及rule的信息.
+//
+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 class CollectDefsAndRules : public GrammarNode::IVisitor {
 public:
 	CollectDefsAndRules() {};
@@ -238,7 +242,7 @@ private:
 	wstring patternOrName_;
 	shared_ptr<RDef> r_;
 	vector<RDef> rules_;
-	vector<TkDef> tokens_;
+	list<TkDef> tokens_;
 };
 
 void collectDefsAndRules(GrammarNode& nd);

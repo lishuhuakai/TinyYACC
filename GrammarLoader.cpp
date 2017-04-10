@@ -4,9 +4,6 @@
 #include "TokenDef.h"
 #include "Lexer.h"
 
-/*
- * 这个文件定义一些全局的变量.
- */
 static vector<TokenDef> _tokens = {
 	TokenDef(wstring(L"DOT"), wstring(L".")),
 	TokenDef(wstring(L"COMMA"), wstring(L",")),
@@ -151,9 +148,11 @@ GrammarLoader::~GrammarLoader()
 {
 }
 
-/**********************************************************************
-	parse相关
-**********************************************************************/
+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//
+//	parse相关.
+//
+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 wstring readFile(wstring fileName) {
 	wifstream f(fileName);
 	return wstring(istreambuf_iterator<wchar_t>(f), istreambuf_iterator<wchar_t>());
@@ -266,9 +265,11 @@ grammarNodePtr parse(GrammarLoader& loader, const wstring& fileName) {
 	return tree.top();
 }
 
-/*************************************************************************************
- 展示一棵ast,通过将节点内容. 下面的内容只是为了查看方便而已,和真正的核心代码没有任何关系.
-**************************************************************************************/
+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//
+// 展示一棵ast. 下面的内容只是为了Debug,和真正的核心代码关系不大.
+//
+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 void printTree(GrammarNode& g) {
 	PrintTree().visitTree(g);
 }
@@ -375,9 +376,12 @@ void PrintTree::visit(ItemNode& it) {
 	lb_ = lb;
 }
 
-/************************************************************************
-	CollectDefAndRule主要从ast中获取token的定义和文法.
-*************************************************************************/
+
+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//
+//	CollectDefAndRule主要从ast中获取token的定义和文法.
+//
+//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 void CollectDefsAndRules::collect(GrammarNode & root)
 {
@@ -388,6 +392,43 @@ void CollectDefsAndRules::collect(GrammarNode & root)
 	wcout << L">>>>>>>>>>Tokens<<<<<<<<<<" << endl;
 	for (auto tk : tokens_)
 		wcout << tk << endl;
+	/* 接下里需要对收集到的Rule的Token进行检查 */
+	map<wstring, int> count;
+	for (auto tk = tokens_.begin(); tk != tokens_.end(); ) {
+		if (count.find(tk->type) != count.end()) {
+			if (tk->type[0] == L'#') { // anonymous, it doesn't matter. 
+				list<TkDef>::iterator temp = tk;
+				++tk;
+				tokens_.erase(temp);
+			}
+			else {
+				GeneralError error;
+				error.msg = L"Token " + tk->type + L" 存在多重定义!";
+				throw error;
+			}
+		}
+		else {
+			count[tk->type] = 1;
+			++tk;
+		}
+	}
+	/* 接下来对每一条规则进行分析 */
+	for (auto r : rules_) {
+		auto origin = r.origin;
+		if (count.find(origin) == count.end()) {
+			GeneralError error;
+			error.msg = L"+未定义的类型:" + origin + L"!";
+			throw error;
+		}
+		for (auto elem : r.expansions) {
+			if (count.find(elem) == count.end()) {
+				GeneralError error;
+				error.msg =L"+未定义的类型:" + elem + L"!"; 
+				throw error;
+			}
+		}
+	}
+
 }
 
 void CollectDefsAndRules::visit(ItemNode &it)
@@ -457,5 +498,10 @@ void CollectDefsAndRules::visit(TokenNode& tk)
 }
 
 void collectDefsAndRules(GrammarNode& nd) {
-	CollectDefsAndRules().collect(nd);
+	try {
+		CollectDefsAndRules().collect(nd);
+	}
+	catch (GeneralError& error) {
+		wcout << error.msg << endl;
+	}
 }

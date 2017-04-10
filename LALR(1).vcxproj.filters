@@ -33,9 +33,6 @@
     <ClCompile Include="LALRParser.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="TokenDef.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="GrammarLoader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>

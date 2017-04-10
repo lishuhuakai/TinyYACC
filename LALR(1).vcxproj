@@ -119,7 +119,6 @@
     <ClCompile Include="Rule.cpp" />
     <ClCompile Include="Status.cpp" />
     <ClCompile Include="Symbol.cpp" />
-    <ClCompile Include="TokenDef.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common.h" />

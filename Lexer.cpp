@@ -56,7 +56,7 @@ Token Lexer::next()
 		}
 	}
 	if (wrong) { /* 这么多正则表达式,居然没有一个匹配,也就是所,出现了无法匹配的字符. */
-		throw GrammarError();
+		throw GrammarError(line, column_, L"无法识别的字符");
 	}
 	return Token(names_[i], line, column, mc.str());
 }
@@ -76,22 +76,24 @@ Token Lexer::peek() {
  */
 void checkTokens(vector<TokenDef>& tokens) {
 	set<wstring> count;
-	try
-	{
-		for (auto it = tokens.begin(); it != tokens.end(); ++it) {
-			if (count.find(it->name) != count.end()) {
-				/* 一个Token出现了多重定义 */
-				throw GrammarError();
-			}
-			else
-				count.insert(it->name);
+	for (auto it = tokens.begin(); it != tokens.end(); ++it) {
+		if (count.find(it->name) != count.end()) {
+			/* 一个Token出现了多重定义 */
+			GeneralError error;
+			error.msg = it->name + L"出现了多重定义!";
+			throw error;
+		}
+		else
+			count.insert(it->name);
+		try
+		{
 			wregex(it->pattern);
 		}
-	}
-	catch (regex_error& e)
-	{
-		e.what();
-		throw GrammarError();
+		catch (...) {
+			GeneralError error;
+			error.msg = it->name + L"的定义\"" + it->pattern + L"\"出现了错误!";
+			throw error;
+		}
 	}
 }
 

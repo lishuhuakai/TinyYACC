@@ -39,10 +39,7 @@ void LALRParser::computerLookAhead()
 		for (auto it : satisfied) {
 			/* 可以使用这个来规约 */
 			for (auto sym : g_.follow(it.getRule()->origin())) {
-				//wcout << *status_[stat] << L"规约" << *sym << endl;
-				if (appendAction(*lookahead, sym, makeAction(Action::reduce, it.getRule())) != 1) {
-					throw GrammarError();
-				}
+				appendAction(*lookahead, sym, makeAction(Action::reduce, it.getRule()));
 			}
 		}
 		/* 接下来对于各种符号进行遍历 */
@@ -62,7 +59,9 @@ void LALRParser::computerLookAhead()
 			}
 
 			if (appendAction(*lookahead, sym, makeAction(Action::shift, stat)) != 1) {
-				throw GrammarError();
+				GeneralError error;
+				error.msg = L"移进规约冲突 : " + sym->content_ + L"!";
+				throw error;
 			}
 		}
 		

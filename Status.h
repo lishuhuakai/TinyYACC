@@ -3,7 +3,6 @@
 
 #include "common.h"
 #include "Rule.h"
-#include <memory>
 using namespace std;
 
 struct Status;
