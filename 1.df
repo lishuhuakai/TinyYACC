@@ -2,7 +2,12 @@
 // Grammar are defined as follows:
 expression --> factor "+" item
 item --> item "*" digit
+
+factor: "factor"
 digit: "2"
 
 signal: / [0-9na-zA-Z_] /
 word: / \s+? /
+
+%start expression
+%ignore wc

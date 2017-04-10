@@ -1,6 +1,8 @@
 #pragma once
 #include "Common.h"
 
+struct RuleDef;
+
 //
 // GrammarBuilder 用于构建出Grammar.
 //

@@ -26,7 +26,7 @@ Token Lexer::next()
 	}
 
 	if (offset_ == stream_.length()) // 所有字符均已经被消耗掉了
-		return Token(L"#", line_, column_, L"");
+		return Token(L"#end", line_, column_, L"");
 
 	std::wsmatch mc;
 	bool wrong = true;

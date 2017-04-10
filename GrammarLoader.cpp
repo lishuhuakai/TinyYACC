@@ -41,21 +41,23 @@ static vector<TokenDef> _tokens = {
 };
 
 static vector<TokenDef> _grammarTokens = {
-	{ wstring(L"COLON"), wstring(L":")},		/* 冒号 */
-	{ wstring(L"NAME"), wstring(L"[0-9a-zA-Z_]*")},  /*  */
+	{ wstring(L"COLON"), wstring(L":")},					// 冒号
+	{ wstring(L"NAME"), wstring(L"[0-9a-zA-Z_]*")},
 	{ wstring(L"STRING"), wstring(L"\"(\"|\\\\|[^\"/\n])*?\"")},
-	{ wstring(L"REGEXP"), wstring(L"/\\s([^\n])+\\s/")}, /* */
-	{ wstring(L"NL"), wstring(L"(\\r?\\n)+")}, /* 回车,换行,NL表示new line */
+	{ wstring(L"REGEXP"), wstring(L"/\\s([^\n])+\\s/")},
+	{ wstring(L"NL"), wstring(L"(\\r?\\n)+")},				// 回车,换行,NL表示new line
 	{ wstring(L"WS"), wstring(L"[\\t\\s]+")},
 	{ wstring(L"COMMENT"), wstring(L"//[^\\n]*")},
-	{ wstring(L"TO"), wstring(L"-->")}
+	{ wstring(L"TO"), wstring(L"-->")},
+	{ wstring(L"IGNORE"), wstring(L"%ignore")},
+	{ wstring(L"START"), wstring(L"%start")}
 };
 
 
 GrammarLoader::GrammarLoader() {
 	vector<wstring> ignore = { wstring(L"WS"), wstring(L"COMMENT") };
 	lexer_ = make_shared<Lexer>(_grammarTokens, ignore);
-	symbolPtr start			=		make_shared<Symbol>(Symbol::NonTerminal, L"start");
+	symbolPtr fakeStart		=		make_shared<Symbol>(Symbol::NonTerminal, L"#start");
 	symbolPtr def			=		make_shared<Symbol>(Symbol::NonTerminal, L"def");
 	symbolPtr lst			=		make_shared<Symbol>(Symbol::NonTerminal, L"lst");
 	symbolPtr item			=		make_shared<Symbol>(Symbol::NonTerminal, L"item");
@@ -63,18 +65,23 @@ GrammarLoader::GrammarLoader() {
 	symbolPtr token			=		make_shared<Symbol>(Symbol::NonTerminal, L"token");
 	symbolPtr expansions	=		make_shared<Symbol>(Symbol::NonTerminal, L"expansions");
 	symbolPtr atom			=		make_shared<Symbol>(Symbol::NonTerminal, L"atom");
-	symbolPtr name			=		make_shared<Symbol>(Symbol::Terminal, L"NAME");
-	symbolPtr end			=		make_shared<Symbol>(Symbol::Terminal, L"#");
-	symbolPtr nl			=		make_shared<Symbol>(Symbol::Terminal, L"NL");
-	symbolPtr to			=		make_shared<Symbol>(Symbol::Terminal, L"TO");
-	symbolPtr _string		=		make_shared<Symbol>(Symbol::Terminal, L"STRING");
-	symbolPtr regular		=		make_shared<Symbol>(Symbol::Terminal, L"REGEXP");
-	symbolPtr colon			=		make_shared<Symbol>(Symbol::Terminal, L"COLON");
+	symbolPtr statement		=		make_shared<Symbol>(Symbol::NonTerminal, L"statement"); // new 
+	symbolPtr ignore_stat	=		make_shared<Symbol>(Symbol::NonTerminal, L"ignore");  // new
+	symbolPtr start_stat	=		make_shared<Symbol>(Symbol::NonTerminal, L"start");
+	symbolPtr NAME			=		make_shared<Symbol>(Symbol::Terminal, L"NAME");
+	symbolPtr END			=		make_shared<Symbol>(Symbol::Terminal, L"#end");
+	symbolPtr NL			=		make_shared<Symbol>(Symbol::Terminal, L"NL");
+	symbolPtr TO			=		make_shared<Symbol>(Symbol::Terminal, L"TO");
+	symbolPtr STRING		=		make_shared<Symbol>(Symbol::Terminal, L"STRING");
+	symbolPtr REGEXP		=		make_shared<Symbol>(Symbol::Terminal, L"REGEXP");
+	symbolPtr COLON			=		make_shared<Symbol>(Symbol::Terminal, L"COLON");
+	symbolPtr IGNORE		=		make_shared<Symbol>(Symbol::Terminal, L"IGNORE");	// new
+	symbolPtr START			=		make_shared<Symbol>(Symbol::Terminal, L"START");    // new
 
 	// start -> lst #
-	rulePtr r0 = make_shared<Rule>(start);
+	rulePtr r0 = make_shared<Rule>(fakeStart);
 	r0->expansionAppend(lst);
-	r0->expansionAppend(end);
+	r0->expansionAppend(END);
 	// lst -> lst item
 	rulePtr r1 = make_shared<Rule>(lst);
 	r1->expansionAppend(lst);
@@ -89,13 +96,33 @@ GrammarLoader::GrammarLoader() {
 	r4->expansionAppend(token);
 	// item -> NL [换行符]
 	rulePtr r5 = make_shared<Rule>(item);
-	r5->expansionAppend(nl);
+	r5->expansionAppend(NL);
+	// item -> statement
+	rulePtr r14 = make_shared<Rule>(item);
+	r14->expansionAppend(statement);
+	// statement -> ignore
+	rulePtr r15 = make_shared<Rule>(statement);
+	r15->expansionAppend(ignore_stat);
+	// statement -> start
+	rulePtr r16 = make_shared<Rule>(statement);
+	r16->expansionAppend(start_stat);
+	// ignore -> IGNORE NAME NL
+	rulePtr r17 = make_shared<Rule>(ignore_stat);
+	r17->expansionAppend(IGNORE);
+	r17->expansionAppend(NAME);
+	r17->expansionAppend(NL);
+	// startsym -> START NAME NL
+	rulePtr r18 = make_shared<Rule>(start_stat);
+	r18->expansionAppend(START);
+	r18->expansionAppend(NAME);
+	r18->expansionAppend(NL);
+
 	// rule -> NAME TO expansions NL
 	rulePtr r6 = make_shared<Rule>(rule);
-	r6->expansionAppend(name);
-	r6->expansionAppend(to);
+	r6->expansionAppend(NAME);
+	r6->expansionAppend(TO);
 	r6->expansionAppend(expansions);
-	r6->expansionAppend(nl);
+	r6->expansionAppend(NL);
 	// expansions -> expansions atom
 	rulePtr r7 = make_shared<Rule>(expansions);
 	r7->expansionAppend(expansions);
@@ -104,24 +131,24 @@ GrammarLoader::GrammarLoader() {
 	rulePtr r8 = make_shared<Rule>(expansions);
 	// atom -> NAME
 	rulePtr r9 = make_shared<Rule>(atom);
-	r9->expansionAppend(name);
+	r9->expansionAppend(NAME);
 	// atom -> STRING
 	rulePtr r10 = make_shared<Rule>(atom);
-	r10->expansionAppend(_string);
+	r10->expansionAppend(STRING);
 	// token -> NAME COLON def nl
 	rulePtr r11 = make_shared<Rule>(token);
-	r11->expansionAppend(name);
-	r11->expansionAppend(colon);
+	r11->expansionAppend(NAME);
+	r11->expansionAppend(COLON);
 	r11->expansionAppend(def);
-	r11->expansionAppend(nl);
+	r11->expansionAppend(NL);
 	// def -> REGEXP
 	rulePtr r12 = make_shared<Rule>(def);
-	r12->expansionAppend(regular);
+	r12->expansionAppend(REGEXP);
 	// def -> STRING
 	rulePtr r13 = make_shared<Rule>(def);
-	r13->expansionAppend(_string);
+	r13->expansionAppend(STRING);
 
-	g_ = make_shared<Grammar>(start);
+	g_ = make_shared<Grammar>(fakeStart);
 	g_->appendRule(r0);
 	g_->appendRule(r1);
 	g_->appendRule(r2);
@@ -136,6 +163,11 @@ GrammarLoader::GrammarLoader() {
 	g_->appendRule(r11);
 	g_->appendRule(r12);
 	g_->appendRule(r13);
+	g_->appendRule(r14);
+	g_->appendRule(r15);
+	g_->appendRule(r16);
+	g_->appendRule(r17);
+	g_->appendRule(r18);
 	assert(g_);
 	parser_ = make_shared<LALRParser>(*g_);
 }
@@ -175,7 +207,7 @@ grammarNodePtr parse(GrammarLoader& loader, const wstring& fileName) {
 		Action act = parser->queryAction(state, loader.g_->strToSymbol(tk.kind));
 		if (act.act == Action::shift) { // shift required!
 			auto kk = lexer->next();
-			if (kk.kind == L"#") break; 
+			if (kk.kind == L"#end") break; 
 			stateStack.push(act.index);
 			valueStack.push(tk);
 		}
@@ -248,7 +280,30 @@ grammarNodePtr parse(GrammarLoader& loader, const wstring& fileName) {
 					tree.push(make_shared<LstNode>(lst, item));
 				}
 			}
+			else if (origin->mark_ == L"statement") {
+				// statement -> ignore | start
+				valueStack.pop(); stateStack.pop();	// ignore or start
+				auto ign_or_start = tree.top(); tree.pop();
+				tree.push(make_shared<StatementNode>(ign_or_start));
+			}
+			else if (origin->mark_ == L"ignore") {
+				// ignore -> IGNORE NAME NL
+				valueStack.pop(); stateStack.pop(); // IGNORE
+				auto NAME = valueStack.top(); 
+				valueStack.pop(); stateStack.pop(); // NAME
+				valueStack.pop(); stateStack.pop(); // NL
+				tree.push(make_shared<IgnoreNode>(NAME));
+			}
+			else if (origin->mark_ == L"start") {
+				// start -> START NAME NL
+				valueStack.pop(); stateStack.pop(); // START
+				auto NAME = valueStack.top(); 
+				valueStack.pop(); stateStack.pop(); // NAME
+				valueStack.pop(); stateStack.pop(); // NL
+				tree.push(make_shared<StartNode>(NAME));
+			}
 			else assert(0);
+
 			valueStack.push(Token(r->origin()->mark_));
 			auto act = parser->queryAction(stateStack.top(), loader.g_->strToSymbol(valueStack.top().kind));
 			assert(act.act == Action::shift);
@@ -368,6 +423,26 @@ void PrintTree::visit(ItemNode& it) {
 	lb_ = lb;
 }
 
+void PrintTree::visit(StatementNode& stat) {
+	wstring lb = getRandomLabel();
+	labels_ = labels_ + lb + L"[label=\"StatementNode\"]\n";
+	stat.sub_->evaluate(*this);
+	relations_ = relations_ + lb + L"->" + lb_ + L"\n";
+	lb_ = lb;
+}
+
+void PrintTree::visit(StartNode& start) {
+	wstring lb = getRandomLabel();
+	labels_ = labels_ + lb + L"[label=\"StartNode(" + start.name_ + L")\"]";
+	lb_ = lb;
+}
+
+void PrintTree::visit(IgnoreNode& ign) {
+	wstring lb = getRandomLabel();
+	labels_ = labels_ + lb + L"[label=\"IgnoreNode(" + ign.name_ + L")\"]";
+	lb_ = lb;
+}
+
 
 //
 //	CollectDefAndRule主要从ast中获取token的定义和文法.
@@ -419,11 +494,31 @@ void CollectDefsAndRules::collect(GrammarNode & root)
 		for (auto elem : r.expansions) {
 			bool isTerminal = terminal_.find(elem) != terminal_.end();
 			bool isNonTerminal = nonTerminal_.find(elem) != nonTerminal_.end();
-			if (!isNonTerminal && !isNonTerminal) {
+			if (!isTerminal && !isNonTerminal) {
 				GeneralError error;
 				error.msg = L"# 未定义的类型:" + elem + L". #"; 
 				throw error;
 			}
+		}
+	}
+
+	if (start_.size() != 1) {
+		GeneralError error;
+		error.msg = L"# 存在多个开始符号或者不存在开始符号,这是不被允许的! #";
+		throw error;
+	}
+	if (nonTerminal_.find(start_[0]) == nonTerminal_.end()) {
+		GeneralError error;
+		error.msg = L"# 找不到开始符号的定义! #";
+		throw error;
+	}
+
+	// 接下里要保证ignore里面的定义全部是非终结符
+	for (auto sym : ignore_) {
+		if (terminal_.find(sym) == terminal_.end()) {
+			GeneralError error;
+			error.msg = L"# ignore语句中的" + sym + L"没有定义! #";
+			throw error;
 		}
 	}
 }
@@ -492,6 +587,18 @@ void CollectDefsAndRules::visit(TokenNode& tk)
 	tk.def_->evaluate(*this);
 	token.pattern = patternOrName_;
 	tokens_.push_back(token);
+}
+
+void CollectDefsAndRules::visit(StartNode& start) {
+	start_.push_back(start.name_);
+}
+
+void CollectDefsAndRules::visit(IgnoreNode& start) {
+	ignore_.insert(start.name_);
+}
+
+void CollectDefsAndRules::visit(StatementNode& stat) {
+	stat.sub_->evaluate(*this);
 }
 
 void collectDefsAndRules(GrammarNode& nd) {

@@ -16,6 +16,9 @@ class AtomNode;
 class ExpansionsNode;
 class DefNode;
 class ItemNode;
+class StatementNode;
+class IgnoreNode;
+class StartNode;
 typedef shared_ptr<GrammarNode> grammarNodePtr;
 
 //
@@ -50,13 +53,16 @@ public:
 public:
 	class IVisitor {
 	public:
-		virtual void visit(LstNode&)=0;
-		virtual void visit(RuleNode&)=0;
-		virtual void visit(ExpansionsNode&)=0;
-		virtual void visit(TokenNode&)=0;
-		virtual void visit(DefNode&)=0;
-		virtual void visit(AtomNode&)=0;
-		virtual void visit(ItemNode&)=0;
+		virtual void visit(LstNode&) = 0;
+		virtual void visit(RuleNode&) = 0;
+		virtual void visit(ExpansionsNode&) = 0;
+		virtual void visit(TokenNode&) = 0;
+		virtual void visit(DefNode&) = 0;
+		virtual void visit(AtomNode&) = 0;
+		virtual void visit(ItemNode&) = 0;
+		virtual void visit(StartNode&) = 0;
+		virtual void visit(IgnoreNode&) = 0;
+		virtual void visit(StatementNode&) = 0;
 	};
 	wstring type_;
 public:
@@ -175,6 +181,39 @@ public:
 	grammarNodePtr sub_;
 };
 
+class StatementNode : public GrammarNode {
+public:
+	StatementNode(grammarNodePtr& nd) :
+		GrammarNode(L"statement"), sub_(nd)
+	{}
+	grammarNodePtr sub_;
+	void evaluate(IVisitor& v) {
+		v.visit(*this);
+	}
+};
+
+class IgnoreNode : public GrammarNode {
+public:
+	IgnoreNode(Token& tk) :
+		GrammarNode(L"ignore"), name_(tk.content)
+	{}
+	void evaluate(IVisitor& v) {
+		v.visit(*this);
+	}
+	wstring name_;
+};
+
+class StartNode : public GrammarNode {
+public:
+	StartNode(Token& tk) :
+		GrammarNode(L"start"), name_(tk.content)
+	{}
+	void evaluate(IVisitor& v) {
+		v.visit(*this);
+	}
+	wstring name_;
+};
+
 //
 //	打印一棵树.
 //
@@ -194,6 +233,9 @@ private:
 	void visit(RuleNode&);
 	void visit(ExpansionsNode&);
 	void visit(TokenNode&);
+	void visit(StartNode&);
+	void visit(IgnoreNode&);
+	void visit(StatementNode&);
 	static wstring getRandomLabel();
 };
 
@@ -215,12 +257,17 @@ private:
 	void visit(RuleNode&);
 	void visit(ExpansionsNode&);
 	void visit(TokenNode&);
+	void visit(StartNode&);
+	void visit(IgnoreNode&);
+	void visit(StatementNode&);
 private:
 	wstring patternOrName_;
 	shared_ptr<RuleDef> r_;
 	vector<RuleDef> rules_;
 	list<TokenDef> tokens_;
 public:
+	vector<wstring> start_;		// 用于记录开始的符号
+	set<wstring> ignore_;
 	set<wstring> terminal_;
 	set<wstring> nonTerminal_;
 };
