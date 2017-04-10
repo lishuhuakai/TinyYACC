@@ -11,7 +11,7 @@ struct Token {
 	Token(const wstring& kind, size_t line, size_t column, const wstring& content) :
 	kind(kind), line(line), column(column), content(content)
 	{}
-	/* 下面这个构造函数在某些时候也是用得到的! */
+	// 下面这个构造函数在某些时候也是用得到的!
 	Token(const wstring& kind) :
 		kind(kind), line(0), column(0)
 	{}
@@ -21,9 +21,9 @@ struct Token {
 	}
 };
 
-/*
- * Lexer是一个词法分析器.
- */
+//
+// Lexer是一个词法分析器.
+//
 class Lexer
 {
 public:
@@ -34,8 +34,8 @@ private:
 	vector<wstring> names_;
 	set<wstring> ignore_;
 	wstring stream_;
-	size_t offset_;					/* 用于记录已经解析到了的位置 */
-	size_t line_;					/* 记录文本所在的行,列也非常重要 */
+	size_t offset_;					// 用于记录已经解析到了的位置
+	size_t line_;					// 记录文本所在的行,列也非常重要
 	size_t column_;
 	list<Token> cache_;
 public:

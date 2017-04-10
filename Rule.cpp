@@ -9,9 +9,6 @@ Rule::~Rule()
 {
 }
 
-/*
- * 拷贝构造函数
- */
 Rule::Rule(const Rule & r)
 {
 	this->origin_ = r.origin_;
@@ -47,10 +44,9 @@ wostream & operator<<(wostream & os, Rule & r)
 	return os;
 }
 
-/*********************************************************************************
-Items
-**********************************************************************************/
-
+//
+// Items
+//
 Item::Item(rulePtr& r, int pos) :
 	rule_(r), pos_(pos)
 {
@@ -61,9 +57,9 @@ Item::~Item()
 {
 }
 
-/*
-* Item的operator<<函数纯粹是为了调试方便.
-*/
+//
+// Item的operator<<函数纯粹是为了调试方便.
+//
 wostream & operator<<(wostream & os, Item & it)
 {
 	os << *(it.rule_->origin()) << L" --> ";

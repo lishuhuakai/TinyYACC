@@ -41,7 +41,7 @@ public:
 		assert(table_.find(state) != table_.end());
 		if (table_[state].find(sym) == table_[state].end()) {
 			GeneralError error;
-			error.msg = L"无法为" + sym->content_ + L"查询到Action!";
+			error.msg = L"无法为" + sym->mark_ + L"查询到Action!";
 			throw error;
 		}
 		return table_[state][sym];

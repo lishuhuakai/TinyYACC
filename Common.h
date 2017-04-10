@@ -20,16 +20,9 @@ typedef shared_ptr<Symbol> symbolPtr;
 typedef shared_ptr<Rule> rulePtr;
 typedef shared_ptr<Grammar> grammarPtr;
 
-
-//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 //
-//   about set
+// isSubSet 用于判断l是否是r的子集,算法复杂度O(N).
 //
-//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-/*
- * isSubSet 用于判断l是否是r的子集,算法复杂度O(N)
- */
 template<typename T>
 bool isSubSet(set<T>& l, set<T>& r) {
 	if (r.size() < l.size()) return false;
@@ -46,25 +39,25 @@ bool isSubSet(set<T>& l, set<T>& r) {
 	return false;
 }
 
-/*
- * 文法的错误 
- */
-class GrammarError {
-private:
-	size_t line_;   
-	size_t pos_;
-	wstring msg_;
+//
+// GrammarError用于记录文法的错误. 
+//
+struct GrammarError {
 public:
-	GrammarError(size_t line, size_t pos,const wstring& msg) :
-		line_(line), pos_(pos), msg_(msg)
-	{}
+	size_t line;   
+	size_t pos;
+	wstring msg;
+public:
 	wstring what() {
-		wchar_t msg[256];
-		swprintf_s(msg, 256, L"In line %d pos %d : %s\n", line_, pos_, msg_.c_str());
-		return msg;
+		wchar_t message[256];
+		swprintf_s(message, 256, L"In line %d pos %d : %s\n", line, pos, msg.c_str());
+		return message;
 	}
 };
 
+//
+// GeneralError是一个非常简易的错误类,只用于记录出错的信息,对于我们这个简易的YACC来说,足够了.
+//
 struct GeneralError {
 public:
 	wstring msg;

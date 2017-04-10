@@ -1,62 +1,58 @@
 #include "Common.h"
 #include "LALRParser.h"
 #include "GrammarLoader.h"
-#include "TokenDef.h"
+#include "Defs.h"
 #include "Lexer.h"
 
 static vector<TokenDef> _tokens = {
-	TokenDef(wstring(L"DOT"), wstring(L".")),
-	TokenDef(wstring(L"COMMA"), wstring(L",")),
-	TokenDef(wstring(L"COLON"), wstring(L":")),
-	TokenDef(wstring(L"SEMICOLON"), wstring(L";")),
-	TokenDef(wstring(L"PLUS"), wstring(L"+")),
-	TokenDef(wstring(L"MINUS"), wstring(L"-")),
-	TokenDef(wstring(L"STAR"), wstring(L"*")),
-	TokenDef(wstring(L"SLASH"), wstring(L"/")),
-	TokenDef(wstring(L"BACKSLASH"), wstring(L"\\")),
-	TokenDef(wstring(L"VBAR"), wstring(L"|")),
-	TokenDef(wstring(L"QMARK"), wstring(L"?")),
-	TokenDef(wstring(L"BANG"), wstring(L"!")),
-	TokenDef(wstring(L"AT"), wstring(L"@")),
-	TokenDef(wstring(L"HASH"), wstring(L"#")),
-	TokenDef(wstring(L"DOLLAR"), wstring(L"$")),
-	TokenDef(wstring(L"PERCENT"), wstring(L"%")),
-	TokenDef(wstring(L"CIRCUMFLEX"), wstring(L"^")),
-	TokenDef(wstring(L"AMPERSAND"), wstring(L"&")),
-	TokenDef(wstring(L"UNDERSCORE"), wstring(L"_")),
-	TokenDef(wstring(L"LESSTHAN"), wstring(L"<")),
-	TokenDef(wstring(L"EQUAL"), wstring(L"=")),
-	TokenDef(wstring(L"DBLQUOTE"), wstring(L"\"")),
-	TokenDef(wstring(L"QUOTE"), wstring(L"'")),
-	TokenDef(wstring(L"LPAR"), wstring(L"(")),
-	TokenDef(wstring(L"RPAR"), wstring(L")")),
-	TokenDef(wstring(L"LBRACE"), wstring(L"{")),
-	TokenDef(wstring(L"RBRACE"), wstring(L"}")),
-	TokenDef(wstring(L"LSQB"), wstring(L"[")),
-	TokenDef(wstring(L"RSQB"), wstring(L"]")),
-	TokenDef(wstring(L"NEWLINE"), wstring(L"\n")),
-	TokenDef(wstring(L"CRLF"), wstring(L"\r\n")),
-	TokenDef(wstring(L"TAB"), wstring(L"\t")),
-	TokenDef(wstring(L"SPACE"), wstring(L" "))
+	{ wstring(L"DOT"), wstring(L".")},
+	{ wstring(L"COMMA"), wstring(L",")},
+	{ wstring(L"COLON"), wstring(L":")},
+	{ wstring(L"SEMICOLON"), wstring(L";")},
+	{ wstring(L"PLUS"), wstring(L"+")},
+	{ wstring(L"MINUS"), wstring(L"-")},
+	{ wstring(L"STAR"), wstring(L"*")},
+	{ wstring(L"SLASH"), wstring(L"/")},
+	{ wstring(L"BACKSLASH"), wstring(L"\\")},
+	{ wstring(L"VBAR"), wstring(L"|")},
+	{ wstring(L"QMARK"), wstring(L"?")},
+	{ wstring(L"BANG"), wstring(L"!")},
+	{ wstring(L"AT"), wstring(L"@")},
+	{ wstring(L"HASH"), wstring(L"#")},
+	{ wstring(L"DOLLAR"), wstring(L"$")},
+	{ wstring(L"PERCENT"), wstring(L"%")},
+	{ wstring(L"CIRCUMFLEX"), wstring(L"^")},
+	{ wstring(L"AMPERSAND"), wstring(L"&")},
+	{ wstring(L"UNDERSCORE"), wstring(L"_")},
+	{ wstring(L"LESSTHAN"), wstring(L"<")},
+	{ wstring(L"EQUAL"), wstring(L"=")},
+	{ wstring(L"DBLQUOTE"), wstring(L"\"")},
+	{ wstring(L"QUOTE"), wstring(L"'")},
+	{ wstring(L"LPAR"), wstring(L"(")},
+	{ wstring(L"RPAR"), wstring(L")")},
+	{ wstring(L"LBRACE"), wstring(L"{")},
+	{ wstring(L"RBRACE"), wstring(L"}")},
+	{ wstring(L"LSQB"), wstring(L"[")},
+	{ wstring(L"RSQB"), wstring(L"]")},
+	{ wstring(L"NEWLINE"), wstring(L"\n")},
+	{ wstring(L"CRLF"), wstring(L"\r\n")},
+	{ wstring(L"TAB"), wstring(L"\t")},
+	{ wstring(L"SPACE"), wstring(L" ")}
 };
 
 static vector<TokenDef> _grammarTokens = {
-	TokenDef(wstring(L"COLON"), wstring(L":")),		/* 冒号 */
-	TokenDef(wstring(L"NAME"), wstring(L"[0-9a-zA-Z_]*")),  /*  */
-	TokenDef(wstring(L"STRING"), wstring(L"\"(\"|\\\\|[^\"/\n])*?\"")),
-	TokenDef(wstring(L"REGEXP"), wstring(L"/\\s([^\n])+\\s/")), /* */
-	TokenDef(wstring(L"NL"), wstring(L"(\\r?\\n)+")), /* 回车,换行,NL表示new line */
-	TokenDef(wstring(L"WS"), wstring(L"[\\t\\s]+")),
-	TokenDef(wstring(L"COMMENT"), wstring(L"//[^\\n]*")),
-	TokenDef(wstring(L"TO"), wstring(L"-->"))
+	{ wstring(L"COLON"), wstring(L":")},		/* 冒号 */
+	{ wstring(L"NAME"), wstring(L"[0-9a-zA-Z_]*")},  /*  */
+	{ wstring(L"STRING"), wstring(L"\"(\"|\\\\|[^\"/\n])*?\"")},
+	{ wstring(L"REGEXP"), wstring(L"/\\s([^\n])+\\s/")}, /* */
+	{ wstring(L"NL"), wstring(L"(\\r?\\n)+")}, /* 回车,换行,NL表示new line */
+	{ wstring(L"WS"), wstring(L"[\\t\\s]+")},
+	{ wstring(L"COMMENT"), wstring(L"//[^\\n]*")},
+	{ wstring(L"TO"), wstring(L"-->")}
 };
 
 
-/*
- * 在构造函数里面需要加载最初的文法规则.
- */
 GrammarLoader::GrammarLoader() {
-	/* 在这里,我需要重新构建一套文法 */
 	vector<wstring> ignore = { wstring(L"WS"), wstring(L"COMMENT") };
 	lexer_ = make_shared<Lexer>(_grammarTokens, ignore);
 	symbolPtr start			=		make_shared<Symbol>(Symbol::NonTerminal, L"start");
@@ -148,11 +144,9 @@ GrammarLoader::~GrammarLoader()
 {
 }
 
-//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 //
 //	parse相关.
 //
-//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 wstring readFile(wstring fileName) {
 	wifstream f(fileName);
 	return wstring(istreambuf_iterator<wchar_t>(f), istreambuf_iterator<wchar_t>());
@@ -188,19 +182,19 @@ grammarNodePtr parse(GrammarLoader& loader, const wstring& fileName) {
 		else { // reduce required!
 			rulePtr r = parser->queryRule(act.index);
 			auto origin = r->origin();
-			if (origin->content_ == L"atom") {
+			if (origin->mark_ == L"atom") {
 				// atom -> STRING
 				// atom -> NAME
 				auto pattern = valueStack.top(); stateStack.pop(); 
 				tree.push(make_shared<AtomNode>(pattern)); valueStack.pop();
 			}
-			else if (origin->content_ == L"def") {
+			else if (origin->mark_ == L"def") {
 				// def -> REGEXP
 				// def -> STRING
 				auto pattern = valueStack.top(); stateStack.pop(); 
 				tree.push(make_shared<DefNode>(pattern)); valueStack.pop();
 			}
-			else if (origin->content_ == L"token") {
+			else if (origin->mark_ == L"token") {
 				// token -> NAME COLON def NL
 				valueStack.pop(); stateStack.pop(); // NL
 				valueStack.pop(); stateStack.pop(); // def
@@ -210,7 +204,7 @@ grammarNodePtr parse(GrammarLoader& loader, const wstring& fileName) {
 
 				tree.push(make_shared<TokenNode>(NAME, def));
 			}
-			else if (origin->content_ == L"rule") {
+			else if (origin->mark_ == L"rule") {
 				// rule -> NAME TO expansions NL
 				valueStack.pop(); stateStack.pop(); // NL
 				valueStack.pop(); stateStack.pop(); // expansions
@@ -219,7 +213,7 @@ grammarNodePtr parse(GrammarLoader& loader, const wstring& fileName) {
 				auto exps = tree.top(); tree.pop();
 				tree.push(make_shared<RuleNode>(NAME, exps));
 			}
-			else if (origin->content_ == L"expansions") {
+			else if (origin->mark_ == L"expansions") {
 				// expansions -> expansions atom | ε
 				if (r->expansionLength() == 0) {
 					tree.push(make_shared<ExpansionsNode>());
@@ -232,16 +226,16 @@ grammarNodePtr parse(GrammarLoader& loader, const wstring& fileName) {
 					tree.push(make_shared<ExpansionsNode>(exps, atom));
 				}
 			}
-			else if (origin->content_ == L"item") {
+			else if (origin->mark_ == L"item") {
 				// item -> rule | token | NL
 				valueStack.pop(); stateStack.pop(); // rule or token or NL
-				if (r->findNthElem(0)->content_ != L"NL") {
+				if (r->findNthElem(0)->mark_ != L"NL") {
 					auto ruleOrToken = tree.top(); tree.pop();
 					tree.push(make_shared<ItemNode>(ruleOrToken));
 				}
 				else tree.push(make_shared<ItemNode>());
 			}
-			else if (origin->content_ == L"lst") {
+			else if (origin->mark_ == L"lst") {
 				// lst -> lst item | ε
 				if (r->isEpsRule()) {
 					tree.push(make_shared<LstNode>());
@@ -255,7 +249,7 @@ grammarNodePtr parse(GrammarLoader& loader, const wstring& fileName) {
 				}
 			}
 			else assert(0);
-			valueStack.push(Token(r->origin()->content_));
+			valueStack.push(Token(r->origin()->mark_));
 			auto act = parser->queryAction(stateStack.top(), loader.g_->strToSymbol(valueStack.top().kind));
 			assert(act.act == Action::shift);
 			stateStack.push(act.index);
@@ -265,19 +259,17 @@ grammarNodePtr parse(GrammarLoader& loader, const wstring& fileName) {
 	return tree.top();
 }
 
-//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 //
 // 展示一棵ast. 下面的内容只是为了Debug,和真正的核心代码关系不大.
 //
-//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 void printTree(GrammarNode& g) {
 	PrintTree().visitTree(g);
 }
 
 
-/*
-* getRaomLabel  获取一个随机的,但是每次都不一样的label,实际上也不是每次都不一样,只是有一个周期而已.
-*/
+//
+// getRaomLabel 获取一个随机的,但是每次都不一样的label,实际上也不是每次都不一样,只是有一个周期而已.
+//
 wstring PrintTree::getRandomLabel() {
 	wstring label;
 	static wchar_t first = L'a';
@@ -377,58 +369,63 @@ void PrintTree::visit(ItemNode& it) {
 }
 
 
-//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 //
 //	CollectDefAndRule主要从ast中获取token的定义和文法.
 //
-//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-void CollectDefsAndRules::collect(GrammarNode & root)
-{
-	root.evaluate(*this);
+void CollectDefsAndRules::printDefsAndRules() {
 	wcout << L">>>>>>>>>>Rules<<<<<<<<<<" << endl;
 	for (auto r : rules_)
 		wcout << r << endl;
 	wcout << L">>>>>>>>>>Tokens<<<<<<<<<<" << endl;
 	for (auto tk : tokens_)
 		wcout << tk << endl;
-	/* 接下里需要对收集到的Rule的Token进行检查 */
-	map<wstring, int> count;
+}
+
+void CollectDefsAndRules::collect(GrammarNode & root)
+{
+	root.evaluate(*this);
+	// 接下里需要对收集到的Rule的Token进行检查
 	for (auto tk = tokens_.begin(); tk != tokens_.end(); ) {
-		if (count.find(tk->type) != count.end()) {
-			if (tk->type[0] == L'#') { // anonymous, it doesn't matter. 
-				list<TkDef>::iterator temp = tk;
+		if (terminal_.find(tk->mark) != terminal_.end()) {
+			if (tk->mark[0] == L'#') {	// anonymous, it doesn't matter. 
+				list<TokenDef>::iterator temp = tk;
 				++tk;
 				tokens_.erase(temp);
 			}
 			else {
 				GeneralError error;
-				error.msg = L"Token " + tk->type + L" 存在多重定义!";
+				error.msg = L"Token " + tk->mark + L" 存在多重定义!";
 				throw error;
 			}
 		}
 		else {
-			count[tk->type] = 1;
+			terminal_.insert(tk->mark);
 			++tk;
 		}
 	}
-	/* 接下来对每一条规则进行分析 */
+
+	// 接下来对每一条规则进行分析
 	for (auto r : rules_) {
-		auto origin = r.origin;
-		if (count.find(origin) == count.end()) {
+		if (terminal_.find(r.origin) != terminal_.end()) {
 			GeneralError error;
-			error.msg = L"+未定义的类型:" + origin + L"!";
+			error.msg = L"# 重复的类型定义:" + r.origin + L"(既是终结符,也是非终结符). #";
 			throw error;
 		}
+		nonTerminal_.insert(r.origin);
+	}
+
+	// 每一个expansion的元素,要么是终结符,要么是非终结符
+	for (auto r : rules_) {
 		for (auto elem : r.expansions) {
-			if (count.find(elem) == count.end()) {
+			bool isTerminal = terminal_.find(elem) != terminal_.end();
+			bool isNonTerminal = nonTerminal_.find(elem) != nonTerminal_.end();
+			if (!isNonTerminal && !isNonTerminal) {
 				GeneralError error;
-				error.msg =L"+未定义的类型:" + elem + L"!"; 
+				error.msg = L"# 未定义的类型:" + elem + L". #"; 
 				throw error;
 			}
 		}
 	}
-
 }
 
 void CollectDefsAndRules::visit(ItemNode &it)
@@ -454,7 +451,7 @@ void CollectDefsAndRules::visit(AtomNode& at)
 	if (at.attp_ == AtomNode::STRING) {
 		// anoymous
 		patternOrName_ = L"#anoymous_" + at.pattern_;
-		TkDef tk = { patternOrName_, at.pattern_};
+		TokenDef tk = { patternOrName_, at.pattern_};
 		tokens_.push_back(tk);
 	}
 	else 
@@ -470,7 +467,7 @@ void CollectDefsAndRules::visit(DefNode& def)
 void CollectDefsAndRules::visit(RuleNode& r)
 {
 	// rule -> NAME TO expansions NL
-	r_ = make_shared<RDef>();
+	r_ = make_shared<RuleDef>();
 	r_->origin = r.origin_;
 	// 接下来是expansions
 	r.expansion_->evaluate(*this);
@@ -490,8 +487,8 @@ void CollectDefsAndRules::visit(ExpansionsNode& exps)
 
 void CollectDefsAndRules::visit(TokenNode& tk)
 {
-	TkDef token;
-	token.type = tk.name_;
+	TokenDef token;
+	token.mark = tk.name_;
 	tk.def_->evaluate(*this);
 	token.pattern = patternOrName_;
 	tokens_.push_back(token);

@@ -112,6 +112,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Grammar.cpp" />
+    <ClCompile Include="GrammarBuilder.cpp" />
     <ClCompile Include="GrammarLoader.cpp" />
     <ClCompile Include="LALRParser.cpp" />
     <ClCompile Include="Lexer.cpp" />
@@ -123,13 +124,14 @@
   <ItemGroup>
     <ClInclude Include="Common.h" />
     <ClInclude Include="Grammar.h" />
+    <ClInclude Include="GrammarBuilder.h" />
     <ClInclude Include="GrammarLoader.h" />
     <ClInclude Include="LALRParser.h" />
     <ClInclude Include="Lexer.h" />
     <ClInclude Include="Rule.h" />
     <ClInclude Include="Status.h" />
     <ClInclude Include="Symbol.h" />
-    <ClInclude Include="TokenDef.h" />
+    <ClInclude Include="Defs.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -4,6 +4,5 @@ expression --> factor "+" item
 item --> item "*" digit
 digit: "2"
 
-expression: "expression"
 signal: / [0-9na-zA-Z_] /
 word: / \s+? /

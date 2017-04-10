@@ -8,11 +8,11 @@ using namespace std;
 struct Status;
 typedef shared_ptr<Status> statusPtr;
 
-/*
- * status 其实就是一层壳而已.
- */
+//
+// status 其实就是一层壳而已.
+//
 struct Status {
-	shared_ptr<set<Item>> items;  /* 用于记录一大票的Item */
+	shared_ptr<set<Item>> items;  // 用于记录一大票的Item
 
 	Status()
 	{
@@ -25,9 +25,9 @@ struct Status {
 	friend wostream& operator<<(wostream&os, Status& s);
 };
 
-/*
- * 为了尽量减少比较,这里计算一下hash值.
- */
+//
+// 为了尽量减少比较,这里计算一下hash值.
+//
 struct StatusHash {
 	size_t operator() (Status const& s) const {
 		size_t res = 1;

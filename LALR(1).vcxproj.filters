@@ -39,6 +39,9 @@
     <ClCompile Include="Lexer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="GrammarBuilder.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common.h">
@@ -59,13 +62,16 @@
     <ClInclude Include="LALRParser.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="TokenDef.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="GrammarLoader.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Lexer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="GrammarBuilder.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Defs.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

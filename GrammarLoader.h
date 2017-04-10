@@ -2,6 +2,10 @@
 #include "Common.h"
 #include "Grammar.h"
 #include "Lexer.h"
+#include "Defs.h"
+
+struct RuleDef;
+struct TokenDef;
 class Lexer;
 class LALRParser;
 class GrammarNode;
@@ -14,9 +18,9 @@ class DefNode;
 class ItemNode;
 typedef shared_ptr<GrammarNode> grammarNodePtr;
 
-/*
- * GrammarLoader主要用来加载文法.
- */
+//
+// GrammarLoader主要用来加载文法.
+//
 class GrammarLoader {
 public:
 	GrammarLoader();
@@ -33,9 +37,9 @@ public:
 	friend grammarNodePtr parse(GrammarLoader&, const wstring&);
 };
 
-/*
- * 接下来是关于一些Grammar节点的定义.
- */
+//
+// 接下来是关于一些Grammar节点的定义.
+//
 class GrammarNode {
 public:
 	GrammarNode(const wstring& tp) :
@@ -171,12 +175,9 @@ public:
 	grammarNodePtr sub_;
 };
 
-
-//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 //
 //	打印一棵树.
 //
-//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 class PrintTree : public GrammarNode::IVisitor {
 private:
 	wstring labels_;
@@ -196,21 +197,17 @@ private:
 	static wstring getRandomLabel();
 };
 
-/*
- * 向外提供一个接口.
- */
 void printTree(GrammarNode& g);
 
-//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 //
 //	收集def以及rule的信息.
 //
-//-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 class CollectDefsAndRules : public GrammarNode::IVisitor {
 public:
 	CollectDefsAndRules() {};
 	void collect(GrammarNode& root);
-public:
+	void printDefsAndRules();
+private:
 	void visit(ItemNode&);
 	void visit(LstNode&);
 	void visit(AtomNode&);
@@ -219,30 +216,13 @@ public:
 	void visit(ExpansionsNode&);
 	void visit(TokenNode&);
 private:
-	struct RDef {
-		wstring origin;
-		vector<wstring> expansions;
-		friend wostream& operator<<(wostream& os, RDef& r) {
-			os << r.origin << L"	:";
-			for (auto exp : r.expansions) {
-				os << L" " << exp;
-			}
-			return os;
-		}
-	};
-	struct TkDef {
-		wstring type;
-		wstring pattern;
-		friend wostream& operator<<(wostream& os, TkDef& tk) {
-			os << tk.type << L"	:" << tk.pattern;
-			return os;
-		}
-	};
-private:
 	wstring patternOrName_;
-	shared_ptr<RDef> r_;
-	vector<RDef> rules_;
-	list<TkDef> tokens_;
+	shared_ptr<RuleDef> r_;
+	vector<RuleDef> rules_;
+	list<TokenDef> tokens_;
+public:
+	set<wstring> terminal_;
+	set<wstring> nonTerminal_;
 };
 
 void collectDefsAndRules(GrammarNode& nd);
