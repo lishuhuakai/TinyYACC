@@ -62,3 +62,12 @@ struct GeneralError {
 public:
 	wstring msg;
 };
+
+//
+// GrammarTokenType 为文法的Token的标记.
+//
+enum GrammarTokenType {
+	start = -2, end,										 
+	def, lst, rule, token, expansions, atom, statement,		// Non-Terminal
+	NAME, NL, TO, STRING, REGEXP, COLON, IGNORE, START      // Terminal
+};

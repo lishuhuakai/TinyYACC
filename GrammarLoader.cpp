@@ -448,17 +448,23 @@ void PrintTree::visit(IgnoreNode& ign) {
 //	CollectDefAndRule主要从ast中获取token的定义和文法.
 //
 void CollectDefsAndRules::printDefsAndRules() {
-	wcout << L">>>>>>>>>>Rules<<<<<<<<<<" << endl;
+	wcout << L"##########Rules" << endl;
 	for (auto r : rules_)
 		wcout << r << endl;
-	wcout << L">>>>>>>>>>Tokens<<<<<<<<<<" << endl;
+	wcout << L"##########Tokens" << endl;
 	for (auto tk : tokens_)
 		wcout << tk << endl;
+	wcout << L"####start: " << start_[0] << endl;
+	wcout << L"##########ignore: " << endl;
+	for (auto ign : ignore_) {
+		wcout << ign << endl;
+	}
 }
 
 void CollectDefsAndRules::collect(GrammarNode & root)
 {
 	root.evaluate(*this);
+	//printDefsAndRules();
 	// 接下里需要对收集到的Rule的Token进行检查
 	for (auto tk = tokens_.begin(); tk != tokens_.end(); ) {
 		if (terminal_.find(tk->mark) != terminal_.end()) {

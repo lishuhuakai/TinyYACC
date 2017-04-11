@@ -30,10 +30,6 @@ public:
 	~GrammarLoader();
 private:
 	shared_ptr<Grammar>  g_;
-	enum TokenType {
-		def, lst, rule, token, expansions, atom, // Non-Terminal
-		NAME, NL, TO, STRING, REGEXP, COLON      // Terminal
-	};
 public:
 	shared_ptr<Lexer> lexer_;
 	shared_ptr<LALRParser> parser_;
@@ -265,11 +261,10 @@ private:
 	shared_ptr<RuleDef> r_;
 	vector<RuleDef> rules_;
 	list<TokenDef> tokens_;
-public:
-	vector<wstring> start_;		// 用于记录开始的符号
-	set<wstring> ignore_;
-	set<wstring> terminal_;
-	set<wstring> nonTerminal_;
+	vector<wstring> start_;		// 用于记录开始的Token
+	set<wstring> ignore_;		// 一些需要被忽略的Token
+	set<wstring> terminal_;		// 终结符
+	set<wstring> nonTerminal_;  // 非终结符
 };
 
 void collectDefsAndRules(GrammarNode& nd);

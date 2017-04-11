@@ -5,6 +5,7 @@
 #include "GrammarLoader.h"
 #include "Lexer.h"
 #include "LALRParser.h"
+#include "GrammarBuilder.h"
 #include <regex>
 using namespace std;
 /*
