@@ -27,9 +27,6 @@
     <ClCompile Include="Status.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="LALRParser.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="GrammarLoader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -43,6 +40,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="SymbolTable.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LALRParserTable.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -59,9 +59,6 @@
     <ClInclude Include="Status.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="LALRParser.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="GrammarLoader.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -75,6 +72,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="SymbolTable.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="LALRParserTable.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

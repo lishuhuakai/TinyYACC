@@ -8,7 +8,7 @@ namespace tinyYACC {
 	struct RuleDef;
 	struct TokenDef;
 	class Lexer;
-	class LALRParser;
+	class LALRParserTable;
 	class GrammarNode;
 	class RuleNode;
 	class LstNode;
@@ -34,7 +34,7 @@ namespace tinyYACC {
 	public:
 		shared_ptr<SymbolTable> symbols_;
 		shared_ptr<Lexer> lexer_;
-		shared_ptr<LALRParser> parser_;
+		shared_ptr<LALRParserTable> parser_;
 		friend grammarNodePtr parseGrammar(GrammarLoader&, const wstring&);
 	};
 
@@ -247,6 +247,7 @@ namespace tinyYACC {
 		CollectDefsAndRules() {};
 		void collect(GrammarNode& root);
 		void printDefsAndRules();
+		friend shared_ptr<LALRParserTable> buildParsingTable(CollectDefsAndRules& coll);
 	private:
 		void visit(ItemNode&);
 		void visit(LstNode&);

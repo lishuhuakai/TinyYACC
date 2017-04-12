@@ -3,7 +3,7 @@
 #include "Rule.h"
 #include "GrammarLoader.h"
 #include "Lexer.h"
-#include "LALRParser.h"
+#include "LALRParserTable.h"
 #include "GrammarBuilder.h"
 #include <regex>
 using namespace std;

@@ -3,6 +3,8 @@
 #include "Rule.h"
 #include "Grammar.h"
 #include "SymbolTable.h"
+#include "LALRParserTable.h"
+#include "GrammarLoader.h"
 
 namespace tinyYACC {
 	//
@@ -18,6 +20,8 @@ namespace tinyYACC {
 			g_symbolTable.appendType(*it, false);
 		}
 	}
+	
+	
 	grammarPtr buildGrammar(wstring& s, set<wstring>& terminal, set<wstring>& nonTerminal, vector<RuleDef>& rules) {
 		// 首先构建出所有的符号, 并往g_typeMapping中添加.
 		// 第一条文法是增广文法,所谓增广文法,是我们自己添加的一条文法.添加的文法不影响原有文法,但是会给我们后来的处理带来方便.
@@ -35,5 +39,16 @@ namespace tinyYACC {
 			g->appendRule(r);
 		}
 		return g;
+	}
+
+	//
+	// buildParsingTable 构造出Parsing Table.
+	//
+	shared_ptr<LALRParserTable> buildParsingTable(CollectDefsAndRules& coll) {
+		buildSymbolTable(coll.terminal_, coll.nonTerminal_);
+		auto grammar = buildGrammar(coll.start_[0], coll.terminal_, coll.nonTerminal_, coll.rules_);
+		shared_ptr<LALRParserTable> table = make_shared<LALRParserTable>(*grammar);
+		table->computerLookAhead();
+		return table;
 	}
 }
