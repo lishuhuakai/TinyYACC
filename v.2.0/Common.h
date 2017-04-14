@@ -11,6 +11,7 @@
 #include <fstream>
 #include <stack>
 #include <regex>
+#include <sstream>
 using namespace std;
 
 namespace tinyYACC {
@@ -42,26 +43,31 @@ namespace tinyYACC {
 	}
 
 	//
-	// GrammarError用于记录文法的错误. 
-	//
-	struct GrammarError {
-	public:
-		size_t line;
-		wstring msg;
-	public:
-		wstring what() const {
-			wchar_t message[256];
-			swprintf_s(message, 256, L"In line %d : %s\n", line, msg.c_str());
-			return message;
-		}
-	};
-
-	//
 	// GeneralError是一个非常简易的错误类,只用于记录出错的信息,对于我们这个简易的YACC来说,足够了.
 	//
 	struct GeneralError {
 	public:
 		wstring msg;
+		GeneralError(const wstring& msg = L"") : 
+			msg(msg)
+		{}
+	public:
+		wstring what() const {
+			return msg;
+		}
 	};
 
+	//
+	// GrammarError用于记录文法的错误. 
+	//
+	struct GrammarError : public GeneralError {
+	public:
+		GrammarError(size_t line, const wstring& message = L"") :
+			GeneralError()
+		{
+			wostringstream grammarErr;
+			grammarErr << L"In line " << line << L" : " << message << ends;
+			msg = grammarErr.str();
+		}
+	};
 }

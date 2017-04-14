@@ -208,10 +208,6 @@ namespace tinyYACC {
 			}
 		}
 		catch (GeneralError& err) {
-			wcout << err.msg << endl;
-			return nullptr;
-		}
-		catch (GrammarError& err) {
 			wcout << err.what() << endl;
 			return nullptr;
 		}
