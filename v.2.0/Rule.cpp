@@ -11,7 +11,7 @@ namespace tinyYACC {
 	{
 	}
 
-	bool Rule::operator==(Rule & r)
+	bool Rule::operator==(const Rule & r)
 	{
 		if (this->origin_ == r.origin_) {
 			if (this->expansion_.size() != r.expansion_.size()) {
@@ -25,7 +25,7 @@ namespace tinyYACC {
 		return true;
 	}
 
-	wostream& operator<<(wostream& os, Rule& r) {
+	wostream& operator<<(wostream& os, const Rule& r) {
 		os << g_symbolTable[r.origin_] << L" --> ";
 		if (r.isEpsRule()) {
 			os << L"";
@@ -43,7 +43,7 @@ namespace tinyYACC {
 	//
 	// Items
 	//
-	Item::Item(rulePtr& r, int pos) :
+	Item::Item(const rulePtr& r, int pos) :
 		rule_(r), pos_(pos)
 	{
 	}
@@ -56,7 +56,7 @@ namespace tinyYACC {
 	//
 	// Item的operator<<函数纯粹是为了调试方便.
 	//
-	wostream& operator<<(wostream& os, Item& it)
+	wostream& operator<<(wostream& os, const Item& it)
 	{
 		wcout << g_symbolTable[it.rule_->origin()] << L" --> ";
 		size_t i = 0;

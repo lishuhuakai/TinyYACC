@@ -10,7 +10,7 @@ namespace tinyYACC {
 	//
 	// buildSymbolTable 构造一张Symbol Table.
 	//
-	void buildSymbolTable(set<wstring>& terminal, set<wstring>& nonTerminal)
+	void buildSymbolTable(const set<wstring>& terminal, const set<wstring>& nonTerminal)
 	{
 		g_symbolTable.clear();
 		for (auto it = terminal.begin(); it != terminal.end(); ++it) {
@@ -22,7 +22,8 @@ namespace tinyYACC {
 	}
 	
 	
-	grammarPtr buildGrammar(wstring& s, set<wstring>& terminal, set<wstring>& nonTerminal, vector<RuleDef>& rules) {
+	grammarPtr buildGrammar(const wstring& s, const set<wstring>& terminal,
+		const set<wstring>& nonTerminal, const vector<RuleDef>& rules) {
 		// 首先构建出所有的符号, 并往g_typeMapping中添加.
 		// 第一条文法是增广文法,所谓增广文法,是我们自己添加的一条文法.添加的文法不影响原有文法,但是会给我们后来的处理带来方便.
 		rulePtr r0 = make_shared<Rule>(g_symbolTable.startMark);

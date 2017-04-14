@@ -26,7 +26,7 @@ namespace tinyYACC {
 	// isSubSet 用于判断l是否是r的子集,算法复杂度O(N).
 	//
 	template<typename T>
-	bool isSubSet(set<T>& l, set<T>& r) {
+	bool isSubSet(const set<T>& l,const set<T>& r) {
 		if (r.size() < l.size()) return false;
 		auto e1 = r.begin(), e2 = l.begin();
 		for (; e2 != l.end() && e1 != r.end(); ) {
@@ -49,7 +49,7 @@ namespace tinyYACC {
 		size_t line;
 		wstring msg;
 	public:
-		wstring what() {
+		wstring what() const {
 			wchar_t message[256];
 			swprintf_s(message, 256, L"In line %d : %s\n", line, msg.c_str());
 			return message;

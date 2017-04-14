@@ -53,8 +53,8 @@ namespace tinyYACC {
 		vector<rulePtr> rules_;							// 用于记录规则
 	public:
 		shared_ptr<vector<rulePtr>> findRules(int l);	// 通过l,寻找以l为开头的rule
-		friend wostream& operator<< (wostream& os, Grammar& g);
-		void appendRule(rulePtr& r) {
+		friend wostream& operator<< (wostream& os, const Grammar& g);
+		void appendRule(const rulePtr& r) {
 			rules_.push_back(r);
 		}
 		iterator begin() {
@@ -64,30 +64,30 @@ namespace tinyYACC {
 			return iterator(rules_.end());
 		}
 
-		vector<rulePtr> getAllRules() {						 // 虽然我也不想拷贝一份,但是没有办法,我不能将内部的数据暴露出去.
+		const vector<rulePtr>& getAllRules() {
 			return rules_;
 		}
 
 		void calculateSets();
-		void printSets();
+		void printSets() const;
 
 		shared_ptr<Rule> startRule() {
 			return (*findRules(start_))[0];
 		}
 
-		set<int> follow(symbol s) {
+		const set<int>& follow(symbol s) {
 			assert(follow_.find(s) != follow_.end());
 			return follow_[s];
 		}
 
-		set<int> first(symbol s) {
+		const set<int>& first(symbol s) {
 			assert(first_.find(s) != first_.end());
 			return first_[s];
 		}
 
 	private:
 		void getAllSymbols();
-		static bool updateSet(set<symbol>& t, set<symbol>& s);
+		static bool updateSet(set<symbol>& t, const set<symbol>& s);
 		static bool updateSet(set<symbol>& t, symbol s);
 	};
 }

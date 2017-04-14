@@ -75,7 +75,7 @@ namespace tinyYACC {
 	//
 	//	parseœ‡πÿ.
 	//
-	wstring readFile(wstring fileName) {
+	wstring readFile(const wstring& fileName) {
 		wifstream f(fileName);
 		return wstring(istreambuf_iterator<wchar_t>(f), istreambuf_iterator<wchar_t>());
 	}

@@ -20,7 +20,7 @@ namespace tinyYACC {
 			action act;
 			size_t index;
 			
-			Action(action act, size_t index) :
+			Action(const action act, size_t index) :
 				act(act), index(index)
 			{}
 

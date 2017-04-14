@@ -17,7 +17,7 @@ namespace tinyYACC {
 		Token(int mark) :
 			mark(mark), line(0)
 		{}
-		friend wostream& operator<<(wostream& os, Token& tk);
+		friend wostream& operator<<(wostream& os, const Token& tk);
 	};
 
 	//
@@ -26,7 +26,7 @@ namespace tinyYACC {
 	class Lexer
 	{
 	public:
-		Lexer(vector<TokenDef>&, vector<wstring>&);
+		Lexer(const vector<TokenDef>&, const vector<wstring>&);
 		~Lexer();
 	private:
 		vector<wregex> regexs_;
@@ -37,7 +37,7 @@ namespace tinyYACC {
 		size_t line_;					// 记录文本所在的行,列也非常重要
 		list<Token> cache_;
 	public:
-		void setStream(wstring& stream) {
+		void setStream(const wstring& stream) {
 			offset_ = 0;
 			line_ = 1;
 			stream_ = stream;
@@ -45,8 +45,8 @@ namespace tinyYACC {
 		Token next();
 		Token peek();
 	private: 
-		int countNL(wstring&);
+		int countNL(const wstring&);
 	};
 
-	void checkTokens(vector<TokenDef>& tokens);
+	void checkTokens(const vector<TokenDef>& tokens);
 }

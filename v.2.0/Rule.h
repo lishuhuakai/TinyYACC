@@ -12,38 +12,38 @@ namespace tinyYACC {
 		Rule(symbol start);
 		~Rule();
 	public:
-		bool isEpsRule() {				 // 用于判断这条规则是否是ε规则
+		bool isEpsRule() const {				 // 用于判断这条规则是否是ε规则
 			return expansion_.size() == 0;
 		}
 
-		bool originEqualTo(symbol s) {		// 判断rule的左边是否是s
+		bool originEqualTo(symbol s) const {		// 判断rule的左边是否是s
 			return s == origin_;
 		}
 
-		int findNthElem(size_t n) {		// 寻找rule推导式右侧的第N个元素
+		int findNthElem(size_t n) const {		// 寻找rule推导式右侧的第N个元素
 			assert(n < expansion_.size());
 			return expansion_[n];
 		}
 
-		vector<int>& expansion() {
+		const vector<int>& expansion() const {
 			return expansion_;
 		}
 
-		vector<symbol> subExpansion(size_t from, size_t len) {
+		const vector<symbol>& subExpansion(size_t from, size_t len) const {
 			auto start = expansion_.begin();
 			return vector<symbol>(start + from, start + from + len);
 		}
 
-		shared_ptr<set<symbol>> subExpansionSymbols(size_t from, size_t len) {
+		shared_ptr<set<symbol>> subExpansionSymbols(size_t from, size_t len) const {
 			auto start = expansion_.begin();
 			return make_shared<set<symbol>>(start + from, start + from + len);
 		}
 
-		size_t expansionLength() {
+		size_t expansionLength() const {
 			return expansion_.size();
 		}
 
-		int origin() {		// 获取规则左侧的非终结符
+		int origin() const {		// 获取规则左侧的非终结符
 			return origin_;
 		}
 
@@ -53,8 +53,8 @@ namespace tinyYACC {
 		}
 
 	public:
-		bool operator==(Rule& r);
-		friend wostream& operator<<(wostream& os, Rule& r);
+		bool operator==(const Rule& r);
+		friend wostream& operator<<(wostream& os, const Rule& r);
 	private:
 		int origin_;					// 左边部分
 		vector<int> expansion_;			// 展开部分
@@ -67,7 +67,7 @@ namespace tinyYACC {
 	class Item
 	{
 	public:
-		Item(rulePtr&, int);
+		Item(const rulePtr&, int);
 		~Item();
 
 	private:
@@ -75,20 +75,20 @@ namespace tinyYACC {
 		int pos_;			// 用于记录Item现在已经解析到了rule的expansions的哪一个符号上了
 
 	public:
-		friend wostream& operator<<(wostream& os, Item &it);
+		friend wostream& operator<<(wostream& os, const Item &it);
 
 		bool operator==(const Item& r) const {		// 用于比较两个Item是否相等
 			return (rule_ == r.rule_) && (pos_ == r.pos_);
 		}
 
-		int getPos() {
+		int getPos() const {
 			return pos_;
 		}
 
 		//
 		// 每个item都有一个hash值,如果item相等的话,他们的hash值也相等.
 		//
-		size_t hash() {
+		size_t hash() const {
 			size_t h1 = std::hash<shared_ptr<Rule>>{}(rule_);
 			size_t h2 = std::hash<int>{}(pos_);
 			return h1 ^ (h2 << 1);
@@ -101,14 +101,14 @@ namespace tinyYACC {
 		//
 		// isSatisfied 用于判断pos是否到了rule的最后一个位置,也就是判断能否规约了.
 		//
-		bool isSatisfied() {
+		bool isSatisfied() const {
 			return pos_ == rule_->expansionLength();
 		}
 
 		//
 		// next获取rule_的Expansion中第pos_个符号,存入s中,成功返回true,否则返回false
 		//
-		bool next(int& s) {
+		bool next(int& s) const {
 			if (!isSatisfied()) {
 				s = rule_->findNthElem(pos_);
 				return true;

@@ -270,6 +270,6 @@ namespace tinyYACC {
 		set<wstring> nonTerminal_;  // ·ÇÖÕ½á·û
 	};
 
-	wstring readFile(wstring fileName);
+	wstring readFile(const wstring& fileName);
 	void collectDefsAndRules(GrammarNode& nd);
 }

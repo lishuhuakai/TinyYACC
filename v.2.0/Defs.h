@@ -11,7 +11,7 @@ namespace tinyYACC {
 			name(name), pattern(pattern)
 		{}
 		TokenDef() {}
-		friend wostream& operator<<(wostream& os, TokenDef& tk) {
+		friend wostream& operator<<(wostream& os, const TokenDef& tk) {
 			os << tk.name << L"	:" << tk.pattern;
 			return os;
 		}
@@ -25,7 +25,7 @@ namespace tinyYACC {
 	struct RuleDef {
 		wstring origin;
 		vector<wstring> expansions;
-		friend wostream& operator<<(wostream& os, RuleDef& r) {
+		friend wostream& operator<<(wostream& os, const RuleDef& r) {
 			os << r.origin << L"	:";
 			for (auto exp : r.expansions) {
 				os << L" " << exp;

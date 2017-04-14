@@ -15,22 +15,21 @@ namespace tinyYACC {
 	struct Status {
 		shared_ptr<set<Item>> items;  // 用于记录一大票的Item
 
-		Status()
-		{
-			items = make_shared<set<Item>>();
-		}
+		Status() :
+			items(make_shared<set<Item>>())
+		{}
 
-		void insertItem(Item& it) {
+		void insertItem(const Item& it) {
 			items->insert(it);
 		}
-		friend wostream& operator<<(wostream&os, Status& s);
+		friend wostream& operator<<(wostream&os, const Status& s);
 	};
 
 	//
 	// 为了尽量减少比较,这里计算一下hash值.
 	//
 	struct StatusHash {
-		size_t operator() (Status const& s) const {
+		size_t operator() (const Status & s) const {
 			size_t res = 1;
 			for (auto it : *s.items) {
 				res = res ^ (it.hash() << 1);

@@ -7,13 +7,13 @@ namespace tinyYACC {
 	//
 	// printToken 用于输出Token的值.
 	//
-	wostream& operator<<(wostream& os, Token& tk)
+	wostream& operator<<(wostream& os, const Token& tk)
 	{
 		os << tk.content << L"[" << g_symbolTable[tk.mark] << L"]" << L"(" << tk.line << L")" << endl;
 		return os;
 	}
 
-	Lexer::Lexer(vector<TokenDef>& tokens, vector<wstring>& ignoreTokens)
+	Lexer::Lexer(const vector<TokenDef>& tokens, const vector<wstring>& ignoreTokens)
 	{
 		// 这里非常有可能抛出异常, 但是在构造函数里抛出异常是不被允许的,所以在进行Lexer构造之前,请确保传入的tokens是无误的.
 		for (auto it = tokens.begin(); it != tokens.end(); ++it) {
@@ -74,7 +74,7 @@ namespace tinyYACC {
 		return Token(marks_[i], line, mc.str());
 	}
 
-	int Lexer::countNL(wstring& str) {
+	int Lexer::countNL(const wstring& str) {
 		int res = 0;
 		for (auto s : str) {
 			if (L'\n' == s)
@@ -96,7 +96,7 @@ namespace tinyYACC {
 	//
 	// checkTokens用于检查token的定义是否有问题.
 	//
-	void checkTokens(vector<TokenDef>& tokens) {
+	void checkTokens(const vector<TokenDef>& tokens) {
 		set<wstring> count;
 		for (auto it = tokens.begin(); it != tokens.end(); ++it) {
 			if (count.find(it->name) != count.end()) {
