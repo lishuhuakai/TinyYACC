@@ -60,9 +60,9 @@ namespace tinyYACC {
 	private:
 		Action makeAction(Action::action, size_t);
 		Action makeAction(Action::action, rulePtr&);
-		static size_t appendAction(map<int, shared_ptr<list<Action>>>&, int sym, Action&);
+		static size_t appendAction(map<int, list<Action>>&, int sym, Action&);
 		size_t expandRule(list<Item>&, bool&);
-		shared_ptr<map<int, shared_ptr<list<Item>>>> classify(statusPtr& s, list<Item>&);
+		shared_ptr<map<int, list<Item>>> classify(statusPtr& s, list<Item>&);
 	};
 }
 

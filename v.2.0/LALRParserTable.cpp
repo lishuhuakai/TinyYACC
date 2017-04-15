@@ -30,7 +30,7 @@ namespace tinyYACC {
 		while (!notHandled.empty()) {
 			// 取出一个尚未被处理过的stat
 			size_t stat = notHandled.front(); notHandled.pop();
-			shared_ptr<map<symbol, shared_ptr<list<Action>>>> lookahead = make_shared<map<symbol, shared_ptr<list<Action>>>>();
+			shared_ptr<map<symbol, list<Action>>> lookahead = make_shared<map<symbol, list<Action>>>();
 			list<Item> satisfied;
 
 			// 对状态里的Item进行分类,包括可以规约的项,以及通过某个Item中的next对应的symbol都相同的项
@@ -45,13 +45,13 @@ namespace tinyYACC {
 			// 接下来对于各种符号进行遍历
 			for (auto pr : *group) {
 				int sym = pr.first;
-				shared_ptr<list<Item>> its = pr.second;
+				list<Item>& its = pr.second;
 
-				for (auto i = its->begin(); i != its->end(); ++i) {
+				for (auto i = its.begin(); i != its.end(); ++i) {
 					// 这里可以保证不会越界
 					assert((*i).advance() != false);
 				}
-				size_t stat = expandRule(*its, exists); // 继续扩展状态
+				size_t stat = expandRule(its, exists); // 继续扩展状态
 
 				// 从前不存在过,也就是新加入的节点,需要处理
 				if (!exists) {
@@ -69,7 +69,7 @@ namespace tinyYACC {
 			table_[stat] = map<int, Action>();
 			for (auto pr : *lookahead) {
 				int sym = pr.first;
-				table_[stat][sym] = *pr.second->begin();
+				table_[stat][sym] = *pr.second.begin();
 			}
 		}
 		// 构造出Parsing table之后,status_没有了任何用处
@@ -112,19 +112,19 @@ namespace tinyYACC {
 	}
 
 
-	shared_ptr<map<int, shared_ptr<list<Item>>>> LALRParserTable::classify(statusPtr& s, list<Item>& lst)
+	shared_ptr<map<int, list<Item>>> LALRParserTable::classify(statusPtr& s, list<Item>& lst)
 	{
-		shared_ptr<map<symbol, shared_ptr<list<Item>>>> res = make_shared<map<symbol, shared_ptr<list<Item>>>>();
+		shared_ptr<map<symbol, list<Item>>> res = make_shared<map<symbol, list<Item>>>();
 		for (auto it : *s->items) {
 			// 可规约项不管
 			int next;
 			if (it.next(next)) {
 				if (res->find(next) != res->end()) {
-					(*res)[next]->push_back(it);
+					(*res)[next].push_back(it);
 				}
 				else {
-					(*res)[next] = make_shared<list<Item>>();
-					(*res)[next]->push_back(it);
+					(*res)[next] = list<Item>();
+					(*res)[next].push_back(it);
 				}
 			}
 			else {
@@ -159,14 +159,14 @@ namespace tinyYACC {
 		return Action(Action::reduce, reducePool_.size() - 1);
 	}
 
-	size_t LALRParserTable::appendAction(map<int, shared_ptr<list<Action>>>& lookahead, int sym, Action &act)
+	size_t LALRParserTable::appendAction(map<int, list<Action>>& lookahead, int sym, Action &act)
 	{
 		if (lookahead.find(sym) != lookahead.end()) {
-			lookahead[sym]->push_back(act);
-			return lookahead[sym]->size();
+			lookahead[sym].push_back(act);
+			return lookahead[sym].size();
 		}
-		lookahead[sym] = make_shared<list<Action>>();
-		lookahead[sym]->push_back(act);
+		lookahead[sym] = list<Action>();
+		lookahead[sym].push_back(act);
 		return 1;
 	}
 }
