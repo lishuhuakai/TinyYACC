@@ -69,7 +69,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(VC_IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -115,7 +117,7 @@
     <ClCompile Include="Grammar.cpp" />
     <ClCompile Include="GrammarBuilder.cpp" />
     <ClCompile Include="GrammarLoader.cpp" />
-    <ClCompile Include="LALRParserTable.cpp" />
+    <ClCompile Include="LALRParser.cpp" />
     <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Rule.cpp" />
@@ -127,7 +129,7 @@
     <ClInclude Include="Grammar.h" />
     <ClInclude Include="GrammarBuilder.h" />
     <ClInclude Include="GrammarLoader.h" />
-    <ClInclude Include="LALRParserTable.h" />
+    <ClInclude Include="LALRParser.h" />
     <ClInclude Include="Lexer.h" />
     <ClInclude Include="Rule.h" />
     <ClInclude Include="Status.h" />

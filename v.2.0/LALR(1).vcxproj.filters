@@ -42,7 +42,7 @@
     <ClCompile Include="SymbolTable.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="LALRParserTable.cpp">
+    <ClCompile Include="LALRParser.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -74,7 +74,7 @@
     <ClInclude Include="SymbolTable.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="LALRParserTable.h">
+    <ClInclude Include="LALRParser.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

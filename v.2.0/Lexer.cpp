@@ -15,10 +15,11 @@ namespace tinyYACC {
 
 	Lexer::Lexer(const vector<TokenDef>& tokens, const vector<wstring>& ignoreTokens)
 	{
-		// 这里非常有可能抛出异常, 但是在构造函数里抛出异常是不被允许的,所以在进行Lexer构造之前,请确保传入的tokens是无误的.
+		// 这里非常有可能抛出异常, 但是在构造函数里抛出异常通常是不被允许的,
+		// 所以在进行Lexer构造之前,请确保传入的tokens是无误的.
 		for (auto it = tokens.begin(); it != tokens.end(); ++it) {
 			regexs_.push_back(wregex(it->pattern));
-			marks_.push_back(g_symbolTable[it->name]);
+			marks_.push_back(g_symbolTable[it->name]);  // 将词法的name转化为int
 		}
 		for (auto sym : ignoreTokens)
 		ignore_.insert(g_symbolTable[sym]);

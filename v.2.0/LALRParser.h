@@ -16,17 +16,18 @@ namespace tinyYACC {
 		~LALRParser();
 	public:
 		struct Action {
-			enum action { shift, reduce };
+			enum action { shift, reduce };  // 一共两种动作,一种是移进 shift,一种是规约reduce
 			action act;
-			size_t index;
+			size_t index;					// 用于存储状态status
 			
-			Action(action act, size_t index) :
+			Action(const action act, size_t index) :
 				act(act), index(index)
 			{}
 
 			Action() {}
 
 			Action(const Action& a) {
+				if (&a == this) return;
 				act = a.act;
 				index = a.index;
 			}
@@ -36,7 +37,7 @@ namespace tinyYACC {
 		map<size_t, statusPtr> status_;
 		// 使用vector来存储移进时使用的规则
 		vector<rulePtr> reducePool_;
-		map<size_t, map<int, Action>> table_;
+		map<size_t, map<int, Action>> table_; // size_t标记状态, int标记符号, Action标记动作
 	public:
 		size_t start_;		// 用于记录开始状态的下标
 	public:
@@ -60,9 +61,9 @@ namespace tinyYACC {
 	private:
 		Action makeAction(Action::action, size_t);
 		Action makeAction(Action::action, rulePtr&);
-		static size_t appendAction(map<int, shared_ptr<list<Action>>>&, int sym, Action&);
+		static size_t appendAction(map<int, list<Action>>&, int sym, Action&);
 		size_t expandRule(list<Item>&, bool&);
-		shared_ptr<map<int, shared_ptr<list<Item>>>> classify(statusPtr& s, list<Item>&);
+		shared_ptr<map<int, list<Item>>> classify(statusPtr& s, list<Item>&);
 	};
 }
 

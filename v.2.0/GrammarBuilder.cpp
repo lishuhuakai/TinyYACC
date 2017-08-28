@@ -3,7 +3,7 @@
 #include "Rule.h"
 #include "Grammar.h"
 #include "SymbolTable.h"
-#include "LALRParserTable.h"
+#include "LALRParser.h"
 #include "GrammarLoader.h"
 
 namespace tinyYACC {
@@ -21,7 +21,9 @@ namespace tinyYACC {
 		}
 	}
 	
-	
+	//
+	// buildGrammar 构建出语法表
+	//
 	grammarPtr buildGrammar(const wstring& s, const set<wstring>& terminal,
 		const set<wstring>& nonTerminal, const vector<RuleDef>& rules) {
 		// 首先构建出所有的符号, 并往g_typeMapping中添加.
@@ -45,10 +47,10 @@ namespace tinyYACC {
 	//
 	// buildParsingTable 构造出Parsing Table.
 	//
-	shared_ptr<LALRParserTable> buildParsingTable(CollectDefsAndRules& coll) {
+	shared_ptr<LALRParser> buildParsingTable(CollectDefsAndRules& coll) {
 		buildSymbolTable(coll.terminal_, coll.nonTerminal_);
 		auto grammar = buildGrammar(coll.start_[0], coll.terminal_, coll.nonTerminal_, coll.rules_);
-		shared_ptr<LALRParserTable> table = make_shared<LALRParserTable>(*grammar);
+		shared_ptr<LALRParser> table = make_shared<LALRParser>(*grammar);
 		table->computerLookAhead();
 		return table;
 	}

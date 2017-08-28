@@ -29,7 +29,7 @@ namespace tinyYACC {
 			return expansion_;
 		}
 
-		const vector<symbol>& subExpansion(size_t from, size_t len) const {
+		vector<symbol> subExpansion(size_t from, size_t len) const {
 			auto start = expansion_.begin();
 			return vector<symbol>(start + from, start + from + len);
 		}
@@ -39,7 +39,7 @@ namespace tinyYACC {
 			return make_shared<set<symbol>>(start + from, start + from + len);
 		}
 
-		size_t expansionLength() const {
+		size_t expansionLength() const {  // 获取规则右侧式子的长度
 			return expansion_.size();
 		}
 
@@ -106,7 +106,8 @@ namespace tinyYACC {
 		}
 
 		//
-		// next获取rule_的Expansion中第pos_个符号,存入s中,成功返回true,否则返回false
+		// next获取rule_的Expansion中圆点后面的符号,存入s中,成功返回true,否则返回false
+		// 举个例子: E -> ab●C ,将C对应的标记记入s中.
 		//
 		bool next(int& s) const {
 			if (!isSatisfied()) {

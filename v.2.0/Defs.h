@@ -23,8 +23,8 @@ namespace tinyYACC {
 	// RuleDef是关于规则的定义.
 	//
 	struct RuleDef {
-		wstring origin;
-		vector<wstring> expansions;
+		wstring origin;				// 推导式左侧的非终结符
+		vector<wstring> expansions; // 推导式右侧的终结符或非终结符
 		friend wostream& operator<<(wostream& os, const RuleDef& r) {
 			os << r.origin << L"	:";
 			for (auto exp : r.expansions) {

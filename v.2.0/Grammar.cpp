@@ -42,7 +42,7 @@ namespace tinyYACC {
 	}
 
 	//
-	// updateSet 利用s来更新t,如果t改变了,那么返回true,否则返回false.
+	// updateSet 利用集合s来更新集合t,如果t改变了,那么返回true,否则返回false.
 	//
 	bool Grammar::updateSet(set<symbol>& t, const set<symbol>& s) {
 		size_t len = t.size();
@@ -50,6 +50,9 @@ namespace tinyYACC {
 		return t.size() != len;
 	}
 
+	//
+	// updateSet 利用符号s来更新集合t,如果t发生改变,返回true,否则返回false
+	// 
 	bool Grammar::updateSet(set<symbol>& t, symbol s) {
 		size_t len = t.size();
 		t.insert(s);

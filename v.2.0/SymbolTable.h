@@ -21,12 +21,12 @@ namespace tinyYACC {
 			return reverseTable_[mark].terminal == true;
 		}
 
-		int operator[](const wstring& tp) {
+		int operator[](const wstring& tp) { // 直接由wstring查找对应int值
 			assert(table_.find(tp) != table_.end());
 			return table_[tp];
 		}
 
-		wstring operator[](int mark) {
+		wstring operator[](int mark) { // 由int值查找对应的wstring,即类型名
 			assert(reverseTable_.find(mark) != reverseTable_.end());
 			return reverseTable_[mark].name;
 		}

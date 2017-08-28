@@ -71,16 +71,16 @@ namespace tinyYACC {
 		void calculateSets();
 		void printSets() const;
 
-		shared_ptr<Rule> startRule() {
+		shared_ptr<Rule> startRule() {	// 开始的第一条规则
 			return (*findRules(start_))[0];
 		}
 
-		const set<int>& follow(symbol s) {
+		const set<int>& follow(symbol s) { // 获取符号s的follow集
 			assert(follow_.find(s) != follow_.end());
 			return follow_[s];
 		}
 
-		const set<int>& first(symbol s) {
+		const set<int>& first(symbol s) { // 获取符号s的first集
 			assert(first_.find(s) != first_.end());
 			return first_[s];
 		}

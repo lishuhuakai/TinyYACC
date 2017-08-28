@@ -1,5 +1,5 @@
 #include "Common.h"
-#include "LALRParserTable.h"
+#include "LALRParser.h"
 #include "GrammarLoader.h"
 #include "Defs.h"
 #include "Lexer.h"
@@ -65,7 +65,7 @@ namespace tinyYACC {
 		buildSymbolTable(_terminal, _nonTerminal);
 		lexer_ = make_shared<Lexer>(_tokens, _ignore);
 		g_ = buildGrammar(_start, _terminal, _nonTerminal, _rules);
-		parser_ = make_shared<LALRParserTable>(*g_);
+		parser_ = make_shared<LALRParser>(*g_);
 	}
 
 	GrammarLoader::~GrammarLoader()
@@ -81,7 +81,7 @@ namespace tinyYACC {
 	}
 
 	grammarNodePtr parseGrammar(GrammarLoader& loader, const wstring& fileName) {
-		typedef LALRParserTable::Action Action;
+		typedef LALRParser::Action Action;
 		auto parser = loader.parser_;
 		auto lexer = loader.lexer_;
 		parser->computerLookAhead();

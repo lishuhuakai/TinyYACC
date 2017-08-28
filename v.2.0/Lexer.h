@@ -5,7 +5,9 @@
 
 namespace tinyYACC {
 	struct TokenDef;
-
+	//
+	// Token 词法分析器每次会吐出一个词法单元,即token
+	// 
 	struct Token {
 		int mark;
 		size_t line;
@@ -29,9 +31,9 @@ namespace tinyYACC {
 		Lexer(const vector<TokenDef>&, const vector<wstring>&);
 		~Lexer();
 	private:
-		vector<wregex> regexs_;
+		vector<wregex> regexs_;			// 记录所有词法的正则表达式
 		vector<int> marks_;
-		set<int> ignore_;
+		set<int> ignore_;				// 记录需要被忽略掉的词法单元
 		wstring stream_;
 		size_t offset_;					// 用于记录已经解析到了的位置
 		size_t line_;					// 记录文本所在的行,列也非常重要
@@ -39,7 +41,7 @@ namespace tinyYACC {
 	public:
 		void setStream(const wstring& stream) {
 			offset_ = 0;
-			line_ = 1;
+			line_ = 1;				// 从第1行开始
 			stream_ = stream;
 		}
 		Token next();

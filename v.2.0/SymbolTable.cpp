@@ -7,7 +7,7 @@ namespace tinyYACC {
 		table_[L"#start"] = -2;
 		table_[L"#end"] = -1;
 		reverseTable_[-2] = { L"#start", false };
-		reverseTable_[-1] = { L"#end", true };
+		reverseTable_[-1] = { L"#end", true };  // #endÊÇÖÕ½á·û
 	}
 
 
